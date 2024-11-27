@@ -1,5 +1,5 @@
 package com.tvpss.service;
 
-public class CrewModel {
+public class CrewService {
 
-} 
+}
