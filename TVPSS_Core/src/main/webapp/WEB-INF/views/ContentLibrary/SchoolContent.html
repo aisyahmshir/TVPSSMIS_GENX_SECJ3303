@@ -1,10 +1,351 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TVPSS CORE</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery CDN for DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gray-100 h-screen">
+
+    <!-- Main Container -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+<aside id="sidebar" class="bg-blue-900 text-white w-64 fixed h-full transition-transform transform -translate-x-full z-40">
+    <ul class="space-y-4 p-4">
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
+                Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="Equipments Icon" class="h-6 w-6 mr-2">
+                Studio Level
+            </a>
+        </li>
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="Events Icon" class="h-6 w-6 mr-2">
+                Content Library
+            </a>
+        </li>
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="TVPSS Info & Crew Icon" class="h-6 w-6 mr-2">
+                TVPSS Version & Crew
+            </a>
+        </li>
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
+                School
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<!-- Overlay -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+        <!-- Overlay for smaller screens -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+        <!-- Main Content -->
+<div id="contentWrapper" class="flex-1 flex flex-col transition-all">
+
+            <!-- Header -->
+            <header class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-blue-800 text-white p-4">
+                <div class="flex items-center space-x-4">
+                    <button id="toggleSidebar" class="text-white focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                    <img src="logo.jpeg" alt="Logo" class="h-10">
+                    <h1 class="text-2xl font-bold">TVPSS CORE</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-medium hidden md:inline">Johor</span>
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="h-10 w-10 rounded-full">
+                </div>
+            </header>
+
+            <!-- Content Section -->
+            <div class="content">
+        <button class="btn btn-primary" id="addNewContentBtn">Add New Content</button>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Content Title</th>
+                    <th>Date Created</th>
+                    <th>YouTube Video URL</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="contentTableBody">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+
+        <!-- Add New Content Modal -->
+        <div class="modal" id="addNewContentModal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" id="closeAddNewContentModal">&times;</span>
+                <h2>Add New Content</h2>
+                <form id="addNewContentForm">
+                    <div class="form-group">
+                        <label for="contentTitle">Content Title</label>
+                        <input type="text" id="contentTitle" name="contentTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateCreated">Date Created</label>
+                        <input type="date" id="dateCreated" name="dateCreated" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="youtubeUrl">YouTube Video URL</label>
+                        <input type="url" id="youtubeUrl" name="youtubeUrl" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventName">Event Name</label>
+                        <input type="text" id="eventName" name="eventName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="details">Details</label>
+                        <textarea id="details" name="details" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- View More Modal -->
+        <div class="modal" id="viewMoreModal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" id="closeViewMoreModal">&times;</span>
+                <h2>View More</h2>
+                <form>
+                    <div class="form-group">
+                        <label for="viewTitle">Title</label>
+                        <input type="text" id="viewTitle" name="viewTitle" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="viewDate">Date</label>
+                        <input type="date" id="viewDate" name="viewDate" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="viewEventName">Event Name</label>
+                        <input type="text" id="viewEventName" name="viewEventName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="viewDetails">Details</label>
+                        <textarea id="viewDetails" name="viewDetails" readonly></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+
+            <!-- Footer -->
+            <footer class="bg-blue-900 text-white text-center py-4">
+                <p>Ministry of Education | TVPSS Application Portal</p>
+            </footer>
+        </div>
+        <!-- Modal -->
+<div id="uploadModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 hidden">
+    <div class="flex justify-center items-center h-full">
+        <div class="bg-white p-6 rounded-lg w-1/3 relative">
+            <!-- Modal Title with Close Button -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Upload Google Drive Link</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <!-- Modal Content -->
+            <form id="uploadForm">
+                <label for="driveLink" class="block text-lg mb-2">Google Drive Link</label>
+                <span id="errorLabel" class="text-red-500 text-sm hidden">Please enter a valid Google Drive link.</span>
+                <textarea id="driveLink" name="driveLink" rows="4" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Enter the Google Drive link here"></textarea>
+
+
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-700">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <!-- Sidebar Toggle Script -->
+<script>
+	const sidebar = document.getElementById('sidebar');
+	const sidebarOverlay = document.getElementById('sidebarOverlay');
+	const toggleSidebar = document.getElementById('toggleSidebar');
+	const contentWrapper = document.getElementById('contentWrapper');
+	
+	// Toggle sidebar visibility and adjust layout
+	toggleSidebar.addEventListener('click', () => {
+	    sidebar.classList.toggle('-translate-x-full'); // Show or hide sidebar
+	    sidebarOverlay.classList.toggle('hidden');    // Show or hide overlay
+	    contentWrapper.classList.toggle('ml-64');     // Adjust content margin
+	});
+	
+	// Close sidebar when clicking on overlay
+	sidebarOverlay.addEventListener('click', () => {
+	    sidebar.classList.add('-translate-x-full');   // Ensure sidebar is hidden
+	    sidebarOverlay.classList.add('hidden');      // Ensure overlay is hidden
+	    contentWrapper.classList.remove('ml-64');    // Reset content margin
+	});
+</script>
+
+<script>
+        // Fetch data from the controller endpoint
+        fetch('/content-data')
+            .then(response => response.json())
+            .then(dynamicData => {
+                const contentTableBody = document.getElementById('contentTableBody');
+
+                dynamicData.forEach((data, index) => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${data.title}</td>
+                        <td>${data.date}</td>
+                        <td><a href="${data.youtubeUrl}" target="_blank">${data.youtubeUrl}</a></td>
+                        <td><button class="btn btn-info viewMoreBtn" data-index="${index}">View More</button></td>
+                    `;
+
+                    contentTableBody.appendChild(row);
+                });
+
+                document.querySelectorAll('.viewMoreBtn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = e.target.getAttribute('data-index');
+                        const data = dynamicData[index];
+
+                        document.getElementById('viewTitle').value = data.title;
+                        document.getElementById('viewDate').value = data.date;
+                        document.getElementById('viewEventName').value = data.eventName;
+                        document.getElementById('viewDetails').value = data.details;
+
+                        viewMoreModal.style.display = 'block';
+                    });
+                });
+            })
+            .catch(error => console.error('Error fetching content data:', error));
+
+        // Add New Content Modal Logic
+        const addNewContentBtn = document.getElementById('addNewContentBtn');
+        const addNewContentModal = document.getElementById('addNewContentModal');
+        const closeAddNewContentModal = document.getElementById('closeAddNewContentModal');
+
+        addNewContentBtn.addEventListener('click', () => {
+            addNewContentModal.style.display = 'block';
+        });
+
+        closeAddNewContentModal.addEventListener('click', () => {
+            addNewContentModal.style.display = 'none';
+        });
+
+        // View More Modal Logic
+        const viewMoreModal = document.getElementById('viewMoreModal');
+        const closeViewMoreModal = document.getElementById('closeViewMoreModal');
+
+        closeViewMoreModal.addEventListener('click', () => {
+            viewMoreModal.style.display = 'none';
+        });
+    </script>
+    
+<script>
+    // Get modal and related elements
+    const uploadModal = document.getElementById('uploadModal');
+    const uploadBtns = document.querySelectorAll('.upload-btn');
+    const closeModal = document.getElementById('closeModal');
+    const uploadForm = document.getElementById('uploadForm');
+    const driveLinkInput = document.getElementById('driveLink');
+    const errorLabel = document.getElementById('errorLabel');
+
+    // Open modal
+    uploadBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            uploadModal.classList.remove('hidden'); // Show modal
+            errorLabel.classList.add('hidden'); // Reset error label
+            driveLinkInput.value = ''; // Reset input value
+        });
+    });
+
+    // Close modal
+    closeModal.addEventListener('click', () => {
+        uploadModal.classList.add('hidden'); // Hide modal
+    });
+
+    // Form submit handler
+    uploadForm.addEventListener('submit', (event) => {
+        event.preventDefault(); // Prevent page refresh
+        const driveLink = driveLinkInput.value;
+
+        if (driveLink) {
+            // Handle submission (e.g., API call can be added here)
+            console.log('Submitted:', driveLink);
+
+            // Close the modal after submission
+            uploadModal.classList.add('hidden');
+        } else {
+            // Show error message if the field is empty
+            errorLabel.classList.remove('hidden');
+        }
+    });
+</script>
+
+
+    <!-- DataTables Initialization -->
+
+<script>
+$(document).ready(function () {
+    $('#resultTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        responsive: true,
+        columnDefs: [
+            {
+                targets: [1], // Crew List column (1-based index for second column)
+                orderable: true,
+                type: 'string',
+            },
+            {
+                targets: [5], // Action column (set to not sortable)
+                orderable: false,
+            }
+        ],
+    });
+
+    // Debugging: Check if the DataTables initialization is working
+    console.log("DataTable initialized");
+});
+</script>
 
 </body>
 </html>
+
+
+
