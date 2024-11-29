@@ -6,14 +6,16 @@ public class ContentModel {
     private String title;
     private String dateCreated;
     private String youtubeUrl;
-    private List<Content> additionalDetails;
+    private String eventName;
+    private String details;
 
     // Constructor, getters, and setters
-    public ContentModel(String title, String dateCreated, String youtubeUrl, List<Content> additionalDetails) {
+    public ContentModel(String title, String dateCreated, String youtubeUrl, String eventName, String details) {
         this.title = title;
         this.dateCreated = dateCreated;
         this.youtubeUrl = youtubeUrl;
-        this.additionalDetails = additionalDetails;
+        this.eventName = eventName;
+        this.details = details;
     }
 
     public String getTitle() {
@@ -39,41 +41,23 @@ public class ContentModel {
     public void setYoutubeUrl(String youtubeUrl) {
         this.youtubeUrl = youtubeUrl;
     }
-
-    public List<Content> getAdditionalDetails() {
-        return additionalDetails;
+    
+    public String getEventName() {
+        return eventName;
     }
 
-    public void setAdditionalDetails(List<Content> additionalDetails) {
-        this.additionalDetails = additionalDetails;
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
     }
 
-    // Inner AdditionalDetails class to represent extra content details
-    public static class Content {
-        private String eventName;
-        private String details;
-
-        // Constructor, getters, and setters
-        public Content(String eventName, String details) {
-            this.eventName = eventName;
-            this.details = details;
-        }
-
-        public String getEventName() {
-            return eventName;
-        }
-
-        public void setEventName(String eventName) {
-            this.eventName = eventName;
-        }
-
-        public String getDetails() {
-            return details;
-        }
-
-        public void setDetails(String details) {
-            this.details = details;
-        }
+    public String getDetails() {
+        return details;
     }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
+
+    
 }
 
