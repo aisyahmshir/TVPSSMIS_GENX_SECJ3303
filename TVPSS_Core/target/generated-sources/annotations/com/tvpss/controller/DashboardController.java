@@ -12,8 +12,25 @@ public class DashboardController {
     public String showPage(Model model) {
 		model.addAttribute("labels", List.of("Student", "Teacher", "District"));
         model.addAttribute("data", List.of(69, 12, 5));
-        // If you're using Thymeleaf, return the name of the HTML file without extension
         return "Dashboard/AdminDashboard"; // Matches "yourfile.html" in the templates folder
     }
+	
+	@GetMapping("/StateDashboard")
+	public String showStateDashboard(Model model) {
+	    // Fixed data for the pie chart
+	    model.addAttribute("pieLabels", List.of("Student", "Teacher", "District"));
+	    model.addAttribute("pieData", List.of(55, 30, 15));
+
+	    // Fixed data for the bar chart
+	    model.addAttribute("barLabels", List.of("District 1", "District 2", "District 3", "District 4"));
+	    model.addAttribute("barData", List.of(12, 19, 3, 5));
+
+	    // Fixed data for the line chart
+	    model.addAttribute("lineLabels", List.of("January", "February", "March", "April", "May", "June"));
+	    model.addAttribute("lineData", List.of(65, 59, 80, 81, 56, 55));
+
+	    return "Dashboard/StateDashboard"; // Matches "StateDashboard.html" in the templates folder
+	}
+
  
 }
