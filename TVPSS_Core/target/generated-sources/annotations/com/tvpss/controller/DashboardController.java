@@ -15,10 +15,23 @@ public class DashboardController {
         return "Dashboard/AdminDashboard"; // Matches "yourfile.html" in the templates folder
     }
 	
+	@GetMapping("/DistrictDashboard")
+	public String showDistrictDashboard(Model model) {
+	    // Fixed data for the pie chart
+	    model.addAttribute("pieLabels", List.of("Level 1", "Level 2", "Level 3"));
+	    model.addAttribute("pieData", List.of(55, 30, 15));
+
+	    // Fixed data for the bar chart
+	    model.addAttribute("barLabels", List.of("Microphone", "Camera", "Studio Light", "Other Accesories"));
+	    model.addAttribute("barData", List.of(12, 19, 3, 5));
+
+	    return "Dashboard/DistrictDashboard"; 
+	}
+	
 	@GetMapping("/StateDashboard")
 	public String showStateDashboard(Model model) {
 	    // Fixed data for the pie chart
-	    model.addAttribute("pieLabels", List.of("Student", "Teacher", "District"));
+	    model.addAttribute("pieLabels", List.of("Level 1", "Level 2", "Level 3"));
 	    model.addAttribute("pieData", List.of(55, 30, 15));
 
 	    // Fixed data for the bar chart
