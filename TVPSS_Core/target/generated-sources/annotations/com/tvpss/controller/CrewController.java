@@ -52,11 +52,11 @@ public class CrewController {
 	    // Add dynamic data
 	    List<Map<String, Object>> schools = new ArrayList<>();
 	    Map<String, Object> school1 = new HashMap<>();
-	    school1.put("name", "Example School 1");
+	    school1.put("name", "SMK Pagoh");
 	    school1.put("crew", Arrays.asList("John Doe", "Jane Smith", "Michael Brown", "Emily White", "William Lee"));
 	    school1.put("teacher", "Mr. John");
 	    school1.put("address", "123 School Rd, City");
-	    school1.put("version", "Version 1.2");
+	    school1.put("version", "Version 2");
 
 	    Map<String, Object> school2 = new HashMap<>();
 	    school2.put("name", "Example School 2");
