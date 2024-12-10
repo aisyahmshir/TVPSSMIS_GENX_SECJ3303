@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit School Info</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+
+<style>
+    /* Reusing the color scheme from the provided template */
+    .btn-primary {
+        background-color: #1E3A8A;
+        border-color: #1E3A8A;
+    }
+    .btn-primary:hover {
+        background-color: #1D2D6E;
+        border-color: #1D2D6E;
+    }
+    .dt-button {
+        background-color: #1E3A8A !important;
+        color: white !important;
+        padding: 8px 16px !important;
+        font-size: 14px !important;
+        border-radius: 4px !important;
+    }
+</style>
+
+<body class="bg-gray-100 h-screen">
+    <!-- Main Container -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-blue-900 text-white w-64 fixed h-full transition-transform transform -translate-x-full z-40">
+            <ul class="space-y-4 p-4">
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Equipments Icon" class="h-6 w-6 mr-2">
+                        Studio Level
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Events Icon" class="h-6 w-6 mr-2">
+                        Content Library
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="TVPSS Info & Crew Icon" class="h-6 w-6 mr-2">
+                        TVPSS Version & Crew
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
+                        School
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+        <!-- Main Content -->
+        <div id="contentWrapper" class="flex-1 flex flex-col transition-all">
+            <!-- Header -->
+            <header class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-blue-800 text-white p-4">
+                <div class="flex items-center space-x-4">
+                    <button id="toggleSidebar" class="text-white focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                    <img src="logo.jpeg" alt="Logo" class="h-10">
+                    <h1 class="text-2xl font-bold">TVPSS CORE</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-medium hidden md:inline">SK PAGOH</span>
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="h-10 w-10 rounded-full">
+                </div>
+            </header>
+
+            <!-- Content Section -->
+            <main class="flex-1 p-4 overflow-auto">
+                <h1 class="text-3xl font-bold text-left">Add School Information</h1>
+                <hr class="my-4 border-t-2 border-gray-800">
+
+                <!-- School Edit Form -->
+            <form class="space-y-6 bg-white p-6 rounded-lg shadow-lg">
+		    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+		        <!-- School Name -->
+		        <div>
+		            <label for="schoolName" class="block text-sm font-medium text-gray-700">School Name</label>
+		            <input type="text" id="schoolName" name="schoolName" 
+		                class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+		                placeholder="Enter school name" required />
+		        </div>
+		
+		        <!-- Teacher in Charge -->
+		        <div>
+		            <label for="teacherInCharge" class="block text-sm font-medium text-gray-700">Teacher in Charge</label>
+		            <input type="text" id="teacherInCharge" name="teacherInCharge" 
+		                class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+		                placeholder="Enter teacher name" required />
+		        </div>
+		
+		        <!-- Address -->
+		        <div>
+		            <label for="schoolAddress" class="block text-sm font-medium text-gray-700">Address</label>
+		            <input type="text" id="schoolAddress" name="schoolAddress" 
+		            class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter Address" required />
+		        </div>
+		
+		        <!-- Postcode -->
+		        <div>
+		            <label for="postcode" class="block text-sm font-medium text-gray-700">Postcode</label>
+		            <input type="number" id="postcode" name="postcode" 
+		                class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+		                placeholder="Enter postcode" required />
+		        </div>
+		
+		        <!-- District -->
+		        <div>
+		            <label for="district" class="block text-sm font-medium text-gray-700">District</label>
+		            <input type="text" id="district" name="district" 
+		                class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+		                placeholder="Enter district" required />
+		        </div>
+		
+		        <!-- Phone Number -->
+		        <div>
+		            <label for="schoolPhone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+		            <input type="text" id="schoolPhone" name="schoolPhone" 
+		                class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+		                placeholder="Enter phone number" required />
+		        </div>
+		
+		        <!-- School Logo -->
+		        <div>
+		            <label for="schoolLogo" class="block text-sm font-medium text-gray-700">School Logo</label>
+		            <input type="text" id="schoolLogo" name="schoolLogo" 
+		                class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
+		                placeholder="Enter school logo URL" />
+		        </div>
+		    </div>
+		
+		    <!-- Submit Button -->
+		    <div class="flex justify-end mt-6 space-x-4">
+                    <a th:href="@{/teacherSchoolView/{id}(id=${schoolDetail.id})}" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Save
+                    </a>
+                </div>
+		</form>
+
+
+            </main>
+        </div>
+    </div>
+    <script>
+	const sidebar = document.getElementById('sidebar');
+	const sidebarOverlay = document.getElementById('sidebarOverlay');
+	const toggleSidebar = document.getElementById('toggleSidebar');
+	const contentWrapper = document.getElementById('contentWrapper');
+	
+	// Toggle sidebar visibility and adjust layout
+	toggleSidebar.addEventListener('click', () => {
+	    sidebar.classList.toggle('-translate-x-full'); // Show or hide sidebar
+	    sidebarOverlay.classList.toggle('hidden');    // Show or hide overlay
+	    contentWrapper.classList.toggle('ml-64');     // Adjust content margin
+	});
+	
+	// Close sidebar when clicking on overlay
+	sidebarOverlay.addEventListener('click', () => {
+	    sidebar.classList.add('-translate-x-full');   // Ensure sidebar is hidden
+	    sidebarOverlay.classList.add('hidden');      // Ensure overlay is hidden
+	    contentWrapper.classList.remove('ml-64');    // Reset content margin
+	});
+	</script>
+</body>
+</html>
