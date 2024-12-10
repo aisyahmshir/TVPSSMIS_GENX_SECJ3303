@@ -133,23 +133,17 @@ width:100% !important;
 
             <!-- Content Section -->
             <main class="flex-1 p-4 overflow-auto">
-            
-            <!-- Back Button -->
+                <h1 class="text-3xl font-bold text-left">View Studio Level and Equipments List</h1>
+
+                <hr class="my-4 border-t-2 border-gray-800">
+
+				<div class="flex justify-end mb-4">
 			    <button 
 			        onclick="history.back()" 
-			        class="mb-4 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
+			        class="mb-1 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
 			        <i class="fas fa-arrow-left mr-2"></i> Back
 			    </button>
-			    
-                <h1 class="text-3xl font-bold text-left">View Studio Level and Equipments List</h1>
-                <hr class="my-4 border-t-2 border-gray-800">
-                <div class="mb-4 flex justify-between items-center">
-				    <div>
-				        <button id="filterButton" class="btn btn-primary">
-				            Filter
-				        </button>
-				    </div>
-				</div>
+                </div>
                 <!-- DataTable -->
                 <table id="resultTable" class="display" style="width:100%">
                     <thead>
@@ -179,9 +173,10 @@ width:100% !important;
                     </tbody>
                 </table>
             </main>
-        </div>
-    </div>
-    
+    	<footer class="bg-blue-900 text-white text-center py-4">
+          	<p>Ministry of Education | TVPSS Application Portal</p>
+        </footer>
+	</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
@@ -226,7 +221,7 @@ width:100% !important;
                     }
                 ],
                 paging: false,
-                searching: false,
+                searching: true,
                 ordering: true,
                 responsive:true,
                 info: false

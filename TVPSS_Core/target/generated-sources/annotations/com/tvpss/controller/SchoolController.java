@@ -153,12 +153,12 @@ public class SchoolController {
         // Mock data for demonstration (replace with actual data retrieval from database or service)
         Map<String, Object> schoolDetail = new HashMap<>();
         schoolDetail.put("id", id);
-        schoolDetail.put("schoolName", "SK PAGOH");
-        schoolDetail.put("teacherInCharge", "PN. SYAFIDAH");
+        schoolDetail.put("schoolName", "SK Pagoh");
+        schoolDetail.put("teacherInCharge", "Ms. Syafidah");
         schoolDetail.put("schoolPhone", "07-5562577");
-        schoolDetail.put("schoolAddress", "SK PAGOH, KM 33, PEKAN PAGOH, 84600 PAGOH, JOHOR");
-        schoolDetail.put("postcode", 81300);
-        schoolDetail.put("district", "PAGOH");
+        schoolDetail.put("schoolAddress", "Sekolah Kebangsaan Pagoh, KM 33, Pekan Pagoh, 84600 Pagoh, Johor");
+        schoolDetail.put("postcode", 84600);
+        schoolDetail.put("district", "Pagoh");
         schoolDetail.put("tvpssVersion", "2");
         schoolDetail.put("studioLevel", "2");
         schoolDetail.put("schoolLogo", "path/to/logo.png"); // Example image path (update as needed)

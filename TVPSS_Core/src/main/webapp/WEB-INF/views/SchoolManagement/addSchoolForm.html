@@ -89,7 +89,7 @@
                     <h1 class="text-2xl font-bold">TVPSS CORE</h1>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <span class="font-medium hidden md:inline">SK PAGOH</span>
+                    <span class="font-medium hidden md:inline">SK Pagoh</span>
                     <img src="https://via.placeholder.com/40" alt="User Avatar" class="h-10 w-10 rounded-full">
                 </div>
             </header>
@@ -97,6 +97,18 @@
             <!-- Content Section -->
             <main class="flex-1 p-4 overflow-auto">
                 <h1 class="text-3xl font-bold text-left">Add School Information</h1>
+                <div class="flex justify-between items-center mb-6">
+                	<!-- Studio Level -->
+				    <h2 class="text-xl font-semibold">
+				        Studio Level: <span th:text="${schoolDetail.studioLevel}"></span>
+				    </h2>
+				    <!-- Back Button -->
+				    <button 
+				        onclick="history.back()" 
+				        class="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
+				        <i class="fas fa-arrow-left mr-2"></i> Back
+				    </button>
+				</div>
                 <hr class="my-4 border-t-2 border-gray-800">
 
                 <!-- School Edit Form -->
@@ -151,10 +163,9 @@
 		
 		        <!-- School Logo -->
 		        <div>
-		            <label for="schoolLogo" class="block text-sm font-medium text-gray-700">School Logo</label>
-		            <input type="text" id="schoolLogo" name="schoolLogo" 
-		                class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" 
-		                placeholder="Enter school logo URL" />
+		        <label for="schoolLogo" class="block text-sm font-medium text-gray-700">School Logo</label>
+		        <input type="file" name="schoolLogo" id="schoolLogo" class="mt-2 block w-full border border-gray-300 rounded-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"  accept=".jpg" required>
+		
 		        </div>
 		    </div>
 		
@@ -165,9 +176,10 @@
                     </a>
                 </div>
 		</form>
-
-
-            </main>
+        </main>
+        <footer class="bg-blue-900 text-white text-center py-4">
+          	<p>Ministry of Education | TVPSS Application Portal</p>
+        </footer>
         </div>
     </div>
     <script>

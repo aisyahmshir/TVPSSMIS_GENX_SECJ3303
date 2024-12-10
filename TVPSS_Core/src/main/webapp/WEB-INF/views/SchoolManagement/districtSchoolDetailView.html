@@ -134,17 +134,16 @@ width:100% !important;
             </header>
 
             <!-- Content Section -->
-            <main class="flex-1 p-4 overflow-auto">
-            <!-- Back Button -->
-			    <button 
-			        onclick="history.back()" 
-			        class="mb-4 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
-			        <i class="fas fa-arrow-left mr-2"></i> Back
-			    </button>
-			    
+            <main class="flex-1 p-4 overflow-auto">	    
                 <h1 class="text-3xl font-bold text-left">Manage School Information</h1>
                 <hr class="my-4 border-t-2 border-gray-800">
-
+				<div class="flex justify-end mb-4">
+			    <button 
+			        onclick="history.back()" 
+			        class="mb-1 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
+			        <i class="fas fa-arrow-left mr-2"></i> Back
+			    </button>
+                </div>
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <div class="flex flex-col md:flex-row items-center mb-6">
                         <!-- School Logo -->
@@ -200,6 +199,9 @@ width:100% !important;
                     </div>
                 </div>
             </main>
+            <footer class="bg-blue-900 text-white text-center py-4">
+          	<p>Ministry of Education | TVPSS Application Portal</p>
+        	</footer>
         </div>
     </div>
 
