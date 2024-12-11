@@ -4,18 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TVPSS CORE</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery CDN for DataTables -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 h-screen">
@@ -114,7 +108,7 @@
 					        <td th:text="${school.address}"></td>
 					        <td th:text="${school.version}"></td>
 					        <td>
-					            <button class="btn btn-light upload-btn"><i class="fas fa-upload"></i> Upload Image</button>
+					            <button class="btn btn-light upload-btn"><i class="fas fa-upload"></i> Upload</button>
 					        </td>
 					    </tr>
 					</tbody>
@@ -179,7 +173,6 @@
 </script>
 
 <script>
-    // Get modal and related elements
     const uploadModal = document.getElementById('uploadModal');
     const uploadBtns = document.querySelectorAll('.upload-btn');
     const closeModal = document.getElementById('closeModal');

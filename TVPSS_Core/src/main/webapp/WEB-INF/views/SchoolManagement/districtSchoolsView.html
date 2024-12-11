@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TVPSS CORE</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery CDN for DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
+    
+</head>
+
+<style>
+/* Target DataTable buttons with higher specificity */
+.dt-button{
+    background-color: #1E3A8A !important; /* Dark blue background */
+    color: white !important;               /* White text */
+    border: none !important;               /* Remove border */
+    padding: 8px 16px !important;          /* Adjust padding */
+    font-size: 14px !important;            /* Adjust font size */
+    border-radius: 4px !important;         /* Rounded corners */
+    transition: background-color 0.3s ease !important; /* Smooth transition */
+    width:16% !important;
+    width: 90%;
+}
+
+.dt-buttons{
+display:inline !important;
+    width:56% !important;
+}
+
+.buttons-csv, .buttons-excel{
+width:100% !important;
+}
+
+/* Darker blue on hover */
+.dt-button:hover,
+.dt-button:hover {
+    background-color: #1D2D6E !important; /* Darker blue on hover */
+    color: white !important;              /* Keep text white */
+}
+
+/* Styling for export dropdown button */
+.buttons-collection,
+.buttons-collection {
+    color: white !important;
+}
+
+.buttons-collection:hover,
+.buttons-collection:hover {
+    background-color: #1D4ED8 !important;  /* Darker blue for hover effect */
+}
+
+
+
+</style>
+
+<body class="bg-gray-100 h-screen">
+
+    <!-- Main Container -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-blue-900 text-white w-64 fixed h-full transition-transform transform -translate-x-full z-40">
+            <ul class="space-y-4 p-4">
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Equipments Icon" class="h-6 w-6 mr-2">
+                        Studio Level
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Events Icon" class="h-6 w-6 mr-2">
+                        Content Library
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="TVPSS Info & Crew Icon" class="h-6 w-6 mr-2">
+                        TVPSS Version & Crew
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
+                        School
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+        <!-- Main Content -->
+        <div id="contentWrapper" class="flex-1 flex flex-col transition-all">
+            <!-- Header -->
+            <header class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-blue-800 text-white p-4">
+                <div class="flex items-center space-x-4">
+                    <button id="toggleSidebar" class="text-white focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                    <img src="logo.jpeg" alt="Logo" class="h-10">
+                    <h1 class="text-2xl font-bold">TVPSS CORE</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-medium hidden md:inline">Pagoh</span>
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="h-10 w-10 rounded-full">
+                </div>
+            </header>
+
+    <!-- Content Section -->
+            <main class="flex-1 p-4 overflow-auto">
+
+                <h1 class="text-3xl font-bold text-left">View School Information</h1>
+                <hr class="my-4 border-t-2 border-gray-800">
+                
+                <div class="flex justify-end mb-4">
+			    <button 
+			        onclick="history.back()" 
+			        class="mb-1 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
+			        <i class="fas fa-arrow-left mr-2"></i> Back
+			    </button>
+                </div>
+
+                <!-- DataTable -->
+                <table id="resultTable" class="display" style="width:100%">
+                    <thead>
+                        <tr class="bg-blue-500 text-white">
+                            <th>School</th>
+			                <th>Teacher</th>
+			                <th>Address</th>
+			                <th>Postcode</th>
+			                <th>District</th>
+			                <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="schools : ${schoolsList}">
+                            <td th:text="${schools.schoolName}"></td>
+			                <td th:text="${schools.teacherInCharge}"></td>
+			                <td th:text="${schools.schoolAddress}"></td>
+			                <td th:text="${schools.postcode}"></td>
+			                <td th:text="${schools.district}"></td>
+                            <td>
+                                <a class="btn btn-primary viewMoreBtn" 
+								   th:href="@{/districtSchoolDetail/{id}(id=${schools.id})}">
+								   View More
+								</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+			</main>
+			<footer class="bg-blue-900 text-white text-center py-4">
+          	<p>Ministry of Education | TVPSS Application Portal</p>
+        	</footer>
+        </div>
+    </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+
+<script>
+
+$(document).ready(function() {
+    // Initialize DataTable
+    var table = $('#resultTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'print',
+                text: 'Generate Report',
+                exportOptions: {
+                    columns: ':not(:last-child)' // Exclude the last column from export
+                }
+            }
+        ],
+        paging: true,
+        searching: true,
+        ordering: true,
+        responsive: true,
+    });
+
+    // Filter button functionality
+    $('#filterButton').on('click', function() {
+        // Get the column visibility settings from the user
+        const columns = table.columns();
+
+        const columnOptions = columns[0].map((colIdx) => ({
+            text: table.column(colIdx).header().innerText,
+            visible: table.column(colIdx).visible(),
+            colIdx,
+        }));
+
+        // Create a modal or dropdown to toggle column visibility
+        let optionsHtml = '';
+        columnOptions.forEach(({ text, visible, colIdx }) => {
+            optionsHtml += `
+                <div class="form-check">
+                    <input 
+                        type="checkbox" 
+                        class="form-check-input column-toggle" 
+                        data-column="${colIdx}" 
+                        ${visible ? 'checked' : ''} 
+                    />
+                    <label class="form-check-label">${text}</label>
+                </div>
+            `;
+        });
+
+        // Show the modal or append it to the DOM
+        const filterContainer = $('<div>')
+            .html(optionsHtml)
+            .dialog({
+                title: 'Filter Columns',
+                modal: true,
+                buttons: {
+                    Apply: function() {
+                        $('.column-toggle').each(function() {
+                            const colIdx = $(this).data('column');
+                            const visible = $(this).is(':checked');
+                            table.column(colIdx).visible(visible);
+                        });
+                        $(this).dialog('close');
+                    },
+                    Cancel: function() {
+                        $(this).dialog('close');
+                    },
+                },
+            });
+    });
+});
+
+    </script>
+</body>
+</html>

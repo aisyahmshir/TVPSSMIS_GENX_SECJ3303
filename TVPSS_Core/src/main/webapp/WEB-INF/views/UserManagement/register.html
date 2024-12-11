@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -118,9 +118,10 @@
         </div>
 
         <!-- Right Panel (Welcome Content) -->
-        <div class="right-panel flex flex-col justify-center items-center p-6 w-2/3">
-            <img src="https://via.placeholder.com/150x100" alt="Logo" class="mb-4 w-72 h-auto">
-        </div>
+<div class="right-panel flex flex-col justify-center items-center p-6 w-2/3">
+    <img th:src="@{/images/logo2.png}" alt="Logo" class="mb-4 w-72 h-auto">
+</div>
+
     </div>
 
     <script>

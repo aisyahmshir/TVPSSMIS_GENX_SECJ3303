@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>TVPSS Core</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery CDN for DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
+</head>
+
+<style>
+/* Target DataTable buttons with higher specificity */
+.dt-button{
+    background-color: #1E3A8A !important; /* Dark blue background */
+    color: white !important;               /* White text */
+    border: none !important;               /* Remove border */
+    padding: 8px 16px !important;          /* Adjust padding */
+    font-size: 14px !important;            /* Adjust font size */
+    border-radius: 4px !important;         /* Rounded corners */
+    transition: background-color 0.3s ease !important; /* Smooth transition */
+    width:16% !important;
+    width: 90%;
+}
+
+.dt-buttons{
+display:inline !important;
+    width:56% !important;
+}
+
+.buttons-csv, .buttons-excel{
+width:100% !important;
+}
+
+/* Darker blue on hover */
+.dt-button:hover,
+.dt-button:hover {
+    background-color: #1D2D6E !important; /* Darker blue on hover */
+    color: white !important;              /* Keep text white */
+}
+
+/* Styling for export dropdown button */
+.buttons-collection,
+.buttons-collection {
+    color: white !important;
+}
+
+.buttons-collection:hover,
+.buttons-collection:hover {
+    background-color: #1D4ED8 !important;  /* Darker blue for hover effect */
+}
+
+
+
+</style>
+
+<body class="bg-gray-100 h-screen">
+
+    <!-- Main Container -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-blue-900 text-white w-64 fixed h-full transition-transform transform -translate-x-full z-40">
+            <ul class="space-y-4 p-4">
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Studio Level Icon" class="h-6 w-6 mr-2">
+                        Studio Level
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="Content Library Icon" class="h-6 w-6 mr-2">
+                        Content Library
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="TVPSS Info Icon" class="h-6 w-6 mr-2">
+                        TVPSS Version & Crew
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                        <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
+                        School
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+        <!-- Main Content -->
+        <div id="contentWrapper" class="flex-1 flex flex-col transition-all">
+            <!-- Header -->
+            <header class="flex items-center justify-between bg-gradient-to-r from-blue-500 to-blue-800 text-white p-4">
+                <div class="flex items-center space-x-4">
+                    <button id="toggleSidebar" class="text-white focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                    <img src="logo.jpeg" alt="Logo" class="h-10">
+                    <h1 class="text-2xl font-bold">TVPSS CORE</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-medium hidden md:inline">SK Pagoh</span>
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="h-10 w-10 rounded-full">
+                </div>
+            </header>
+
+            <!-- Content Section -->
+            <main class="flex-1 p-4 overflow-auto">
+                <h1 class="text-3xl font-bold text-left">View Studio Level and Equipments List</h1>
+                
+                <div class="flex justify-between items-center mb-6">
+                	<!-- Studio Level -->
+				    <h2 class="text-xl font-semibold">
+				        Studio Level: <span th:text="${schoolDetail.studioLevel}"></span>
+				    </h2>
+				    <!-- Back Button -->
+				    <button 
+				        onclick="history.back()" 
+				        class="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
+				        <i class="fas fa-arrow-left mr-2"></i> Back
+				    </button>
+				</div>
+                
+                <hr class="my-4 border-t-2 border-gray-800">
+                <!-- School Information -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <div class="flex justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold">School Name: <span th:text="${schoolDetail.schoolName}"></span></h2>
+                            <p class="text-lg font-medium">District: <span th:text="${schoolDetail.district}"></span></p>
+                            <p class="text-lg font-medium">Teacher In-Charge: <span th:text="${schoolDetail.teacherInCharge}"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Studio Level & Equipment -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold">Studio Level: <span th:text="${schoolDetail.studioLevel}"></span></h2>
+                      
+                    </div>
+
+                    <table class="table table-bordered w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th>Equipment</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="equipmentList : ${equipmentList}">
+                                <td th:text="${equipmentList.name}"></td>
+                                <td class="text-center">
+                                    <span th:if="${equipmentList.status == 'Yes'}" class="text-green-500">Yes</span>
+                                    <span th:if="${equipmentList.status == 'No'}" class="text-red-500">No</span>
+                                    <span th:if="${equipmentList.status == 'New'}" class="text-blue-500">New</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Equipment Images Link -->
+                    <div class="mt-4">
+                        <p>Equipment images: <a href="${schoolDetail.equipmentImages}" class="text-blue-500 underline" target="_blank">Click here to view images</a></p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        const toggleSidebar = document.getElementById("toggleSidebar");
+        const sidebar = document.getElementById("sidebar");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+        toggleSidebar.addEventListener("click", () => {
+            sidebar.classList.toggle("-translate-x-full");
+            sidebarOverlay.classList.toggle("hidden");
+        });
+
+        sidebarOverlay.addEventListener("click", () => {
+            sidebar.classList.add("-translate-x-full");
+            sidebarOverlay.classList.add("hidden");
+        });
+
+    </script>
+
+</body>
+</html>

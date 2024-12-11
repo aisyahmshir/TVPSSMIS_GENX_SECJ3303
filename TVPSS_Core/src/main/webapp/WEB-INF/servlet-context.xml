@@ -40,6 +40,6 @@
     </bean>
 
     <!-- Static resource handling (for serving CSS, JS, images) -->
-    <mvc:resources mapping="/resources/" location="/resources/" />
+	<mvc:resources mapping="/images/**" location="/WEB-INF/images/" />
 
 </beans>
