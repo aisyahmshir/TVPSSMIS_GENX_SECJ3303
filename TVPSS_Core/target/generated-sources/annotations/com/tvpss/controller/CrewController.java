@@ -6,41 +6,51 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.tvpss.model.CrewModel;
+import com.tvpss.model.UserModel;
+import com.tvpss.service.CrewService;
 
 @Controller
 public class CrewController {
 	@GetMapping("/studentMainView")
-	public String home(Model model) {
+	public String home(Model model, HttpSession httpSession) {
 	    System.out.println("I'm in");
 
-	    // Example student details
-	    String role = "student"; // This could come from a user service or session
-	    
-	    // Add role to the model
-	    model.addAttribute("role", role);
-	    String studentName = "John Doe";
-	    String studentEmail = "johndoe@example.com";
+	    // Get the userID from the session
+//	    String userID = (String) httpSession.getAttribute("userID");
+	    String userID = "2";
+	    if (userID == null) {
+	        return "redirect:/login"; // Redirect to login if no userID in session
+	    }
 
-	    // Example sessions data (session name, session email, status)
-	    List<CrewModel.Session> sessions = new ArrayList<>();
-	    sessions.add(new CrewModel.Session("Session 1", "pic1@example.com", "Approved"));
-	    sessions.add(new CrewModel.Session("Session 2", "pic2@example.com", "Rejected"));
+	    // Fetch user details from the service
+	    UserModel user = CrewService.getUserDetails(userID);
 
-	    // Create CrewModel object
-	    CrewModel crewModel = new CrewModel(studentName, studentEmail, sessions);
+	    // Fetch application details (crew information) from the service
+	    List<CrewModel> crewDetails = CrewService.getCrewDetails(userID);
 
-	    // Add the CrewModel object to the model
-	    model.addAttribute("crewModel", crewModel);
+	    if (user == null) {
+	        return "redirect:/login"; // Redirect if user details are not found
+	    }
+
+	    // Add user role and details to the model
+	    model.addAttribute("role", user.getRole());
+	    model.addAttribute("user", user);
+
+	    // Add application (crew) details to the model
+	    model.addAttribute("crewDetails", crewDetails);
 
 	    // Return the view name
 	    return "crewVersionModule/studentMainView";
 	}
+
 	
 	@GetMapping("/teacherMainView")
 	public String teacherHome(Model model) {

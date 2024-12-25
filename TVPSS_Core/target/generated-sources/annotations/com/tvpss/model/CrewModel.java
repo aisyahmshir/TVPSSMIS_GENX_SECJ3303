@@ -3,76 +3,81 @@ package com.tvpss.model;
 import java.util.List;
 
 public class CrewModel {
-    private String studentName;
-    private String studentEmail;
-    private List<Session> sessions;
+	private int crewID;
+    private String abilities;
+    private String status;
+    private String session;
+    private String className;
+    private int schoolID;
+    private String userID;
 
-    // Constructor, getters, and setters
-    public CrewModel(String studentName, String studentEmail, List<Session> sessions) {
-        this.studentName = studentName;
-        this.studentEmail = studentEmail;
-        this.sessions = sessions;
+    // Constructor, Getters, and Setters
+    public CrewModel(int crewID, String abilities, String status, String session, 
+                     String className, int schoolID, String userID) {
+        this.crewID = crewID;
+        this.abilities = abilities;
+        this.status = status;
+        this.session = session;
+        this.className = className;
+        this.schoolID = schoolID;
+        this.userID = userID;
     }
 
-    public String getStudentName() {
-        return studentName;
-    }
+    // Getters and setters
+    public int getCrewID() {
+		return crewID;
+	}
 
-    public void setStudentName(String studentName) {
-        this.studentName = studentName;
-    }
+	public void setCrewID(int crewID) {
+		this.crewID = crewID;
+	}
 
-    public String getStudentEmail() {
-        return studentEmail;
-    }
+	public String getAbilities() {
+		return abilities;
+	}
 
-    public void setStudentEmail(String studentEmail) {
-        this.studentEmail = studentEmail;
-    }
+	public void setAbilities(String abilities) {
+		this.abilities = abilities;
+	}
 
-    public List<Session> getSessions() {
-        return sessions;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setSessions(List<Session> sessions) {
-        this.sessions = sessions;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    // Inner Session class to represent session details
-    public static class Session {
-        private String sessionName;
-        private String sessionEmail;
-        private String status;
+	public String getSession() {
+		return session;
+	}
 
-        // Constructor, getters, and setters
-        public Session(String sessionName, String sessionEmail, String status) {
-            this.sessionName = sessionName;
-            this.sessionEmail = sessionEmail;
-            this.status = status;
-        }
+	public void setSession(String session) {
+		this.session = session;
+	}
 
-        public String getSessionName() {
-            return sessionName;
-        }
+	public String getClassName() {
+		return className;
+	}
 
-        public void setSessionName(String sessionName) {
-            this.sessionName = sessionName;
-        }
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
-        public String getSessionEmail() {
-            return sessionEmail;
-        }
+	public int getSchoolID() {
+		return schoolID;
+	}
 
-        public void setSessionEmail(String sessionEmail) {
-            this.sessionEmail = sessionEmail;
-        }
+	public void setSchoolID(int schoolID) {
+		this.schoolID = schoolID;
+	}
 
-        public String getStatus() {
-            return status;
-        }
+	public String getUserID() {
+		return userID;
+	}
 
-        public void setStatus(String status) {
-            this.status = status;
-        }
-    }
+	public void setUserID(String userID) {
+		this.userID = userID;
+	}
 }
+

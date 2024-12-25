@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TVPSS CORE</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery CDN for DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
+ 
+</head>
+<body class="bg-gray-100 h-screen">
+
+    <!-- Main Container -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+<aside id="sidebar" class="bg-blue-900 text-white w-64 fixed h-full transition-transform transform -translate-x-full z-40">
+    <ul class="space-y-4 p-4">
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
+                Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="Equipments Icon" class="h-6 w-6 mr-2">
+                Studio Level
+            </a>
+        </li>
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="Events Icon" class="h-6 w-6 mr-2">
+                Content Library
+            </a>
+        </li>
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="TVPSS Info & Crew Icon" class="h-6 w-6 mr-2">
+                TVPSS Version & Crew
+            </a>
+        </li>
+        <li>
+            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
+                <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
+                School
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<!-- Overlay -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+        <!-- Overlay for smaller screens -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+        <!-- Main Content -->
+<div id="contentWrapper" class="flex-1 flex flex-col transition-all">
+
+            <!-- Header -->
+		<div th:include="header.html"></div>
+
+            <!-- Content Section -->
+           <!-- Content Section -->
+            <main class="flex-1 p-6 overflow-auto">
+                <h1 class="text-3xl font-bold text-left">Analytical Dashboard</h1>
+                <hr class="my-4 border-t-2 border-gray-800">
+
+                <!-- First Row: TVPSS Information Card -->
+                <div class="tvpss-info-card w-full bg-blue-600 text-white p-2 rounded-lg flex items-center justify-center mb-6">
+                    <i class="fas fa-info-circle text-4xl mr-4"></i> <!-- Increased icon size to 4xl -->
+                    <span class="text-2xl font-semibold">TVPSS INFORMATION</span> <!-- Increased text size to 2xl -->
+                </div>
+
+                <!-- Second Row: Two Columns (Left: Summary, Right: Charts) -->
+                <div class="grid grid-cols-12 gap-6">
+                    <!-- First Column (Smaller Width) -->
+                    <div class="col-span-3">
+                        <!-- Summary Card -->
+                        <div class="summary-card bg-white p-6 rounded-lg shadow-md mb-4">
+                            <h2 class="text-xl font-semibold mb-4">Summary</h2>
+                            <div class="summary-cards grid grid-cols-1 gap-2">
+                                <!-- Total School Card -->
+							<div class="summary-cards grid grid-cols-1 gap-4 place-items-center h-full">
+							    <!-- Total School Card -->
+							    <div class="card total-school bg-blue-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">25</div>
+							        <span class="text-sm font-medium text-center mt-2">Total School</span>
+							    </div>
+							    <!-- Completed Requests -->
+							    <div class="card total-districts bg-green-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">17</div>
+							        <span class="text-sm font-medium text-center mt-2">Completed Requests</span>
+							    </div>
+							    <!-- Pending Requests -->
+							    <div class="card total-content bg-orange-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">5</div>
+							        <span class="text-sm font-medium text-center mt-2">Pending Requests</span>
+							    </div>
+							    <!-- Rejected Requests -->
+							    <div class="card total-content bg-red-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">3</div>
+							        <span class="text-sm font-medium text-center mt-2">Rejected Requests</span>
+							    </div>
+							</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Second Column (Larger Width) -->
+                    <div class="col-span-9">
+                        <!-- TVPSS Level Status with Pie Chart -->
+                        <div class="equipment-card bg-white p-6 rounded-lg shadow-md mb-6">
+                            <h2 class="text-xl font-semibold mb-4">TVPSS Level Status</h2>
+                            <div class="bar-chart-container h-52 w-65" style="width:'400px'">
+                                <!-- pie Chart -->
+                                <canvas id="pieChart"></canvas>
+                            </div>
+                        </div>
+                            <!-- First Row: Total Equipment with Bar Chart -->
+						<div class="tpss-level-status-card bg-white p-6 rounded-lg shadow-md">
+						    <h2 class="text-xl font-semibold mb-4">Total Equipment</h2>
+						    <div class="pie-chart-container h-72 w-full flex items-center justify-center">
+						        <!-- bar Chart -->
+						        <canvas id="barChart"></canvas>
+						    </div>
+						</div>
+                    </div>
+                </div>
+            </main>
+            <!-- Footer -->
+            <footer class="bg-blue-900 text-white text-center py-4">
+                <p>Ministry of Education | TVPSS Application Portal</p>
+            </footer>
+        </div>
+        <!-- Modal -->
+
+        
+        
+
+    <!-- Sidebar Toggle Script -->
+<script>
+	const sidebar = document.getElementById('sidebar');
+	const sidebarOverlay = document.getElementById('sidebarOverlay');
+	const toggleSidebar = document.getElementById('toggleSidebar');
+	const contentWrapper = document.getElementById('contentWrapper');
+	
+	// Toggle sidebar visibility and adjust layout
+	toggleSidebar.addEventListener('click', () => {
+	    sidebar.classList.toggle('-translate-x-full'); // Show or hide sidebar
+	    sidebarOverlay.classList.toggle('hidden');    // Show or hide overlay
+	    contentWrapper.classList.toggle('ml-64');     // Adjust content margin
+	});
+	
+	// Close sidebar when clicking on overlay
+	sidebarOverlay.addEventListener('click', () => {
+	    sidebar.classList.add('-translate-x-full');   // Ensure sidebar is hidden
+	    sidebarOverlay.classList.add('hidden');      // Ensure overlay is hidden
+	    contentWrapper.classList.remove('ml-64');    // Reset content margin
+	});
+</script>
+
+    
+   <script th:inline="javascript">
+        // Fixed Data from Thymeleaf model attributes
+        var barLabels = [[${barLabels}]];
+        var barData = [[${barData}]];
+
+        var pieLabels = [[${pieLabels}]];
+        var pieData = [[${pieData}]];
+
+
+        // Bar Chart Data & Configuration
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        const barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: barLabels,
+                datasets: [{
+                    label: 'Total Equipments Category',
+                    data: barData, // Fixed data
+                    backgroundColor: ['#92eb34', '#FFCD56', '#0370ff', '#8103ff'],
+                    borderColor: ['#92eb34', '#FFCD56', '#0370ff', '#8103ff'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, 
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'middle',
+                        align: 'center', // Ensures the legend is aligned to the center of the chart
+                        labels: {
+                            boxWidth: 20, // Adjust the box size if necessary
+                            padding: 10 // Add some padding around the labels
+                        }
+                    }
+                }
+            }
+            //,
+            //plugins: [ChartDataLabels]
+        });
+
+        // Pie Chart Data & Configuration
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: pieLabels,
+                datasets: [{
+                    label: 'TVPSS Level Status',
+                    data: pieData, // Fixed data
+                    backgroundColor: ['#36A2EB', '#FFCD56', '#FF6384'],
+                    borderColor: ['#fff', '#fff', '#fff'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        right: 350,
+                        left: 250// Adjust this value to control the distance between the legend and the chart
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        align: 'center', // Ensures the legend is aligned to the center of the chart
+                        labels: {
+                            boxWidth: 20, // Adjust the box size if necessary
+                            padding: 10 // Add some padding around the labels
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + '%';
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'center',
+                        align: 'center',
+                        formatter: function(value) {
+                            return value + '%';
+                        },
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 20
+                        }
+                    }
+                }
+            }
+			,
+            plugins: [ChartDataLabels] // Make sure ChartDataLabels is available as a plugin
+        });
+
+    </script>
+
+</body>
+</html>
