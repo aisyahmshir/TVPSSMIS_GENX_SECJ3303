@@ -117,9 +117,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="applyForm" action="#" th:action="@{/submitApplication}" method="POST">
+                <form id="applyForm" th:action="@{/submitApplication}" method="POST">
                     <!-- CSRF Token (if required for backend security) -->
-                    <input type="hidden" name="_csrf" th:value="${user.id}" />
+                    <input type="hidden" name="id" th:value="${user.id}" />
+                    <input type="hidden" name="schoolID" th:value="${user.schoolID}" />
 
                     <!-- Student Name -->
                     <div class="mb-3">
@@ -171,33 +172,107 @@
             </div>
             <div class="modal-body">
                 <!-- DataTable -->
-                <table id="resultTable" class="display table table-striped" style="width:100%">
+ <table id="resultTable" class="display table table-striped" style="width:100%">
+    <thead>
+        <tr>
+            <th>Session</th>
+            <th>Class</th>
+            <th>Status</th>
+            <th>Teacher Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Iterate over the crewDetails list -->
+        <tr th:each="detail : ${crewDetails}">
+            <td th:text="${detail.session}">Session</td>
+            <td th:text="${detail.className}">Class Name</td>
+            <td>
+                <!-- Display badge based on status -->
+                <span th:classappend="${detail.status == 'Rejected' ? 'badge bg-danger' : (detail.status == 'Pending' ? 'badge bg-warning text-dark' : 'badge bg-success')}"
+                      th:text="${detail.status}">
+                    Status
+                </span>
+            </td>
+            <td th:text="${detail.teachers[0].name}">Teacher Name</td>
+            <td>
+                <!-- View More Button -->
+                <button type="button" class="btn btn-sm btn-info" th:attr="data-id=${detail.crewID}" onclick="viewMore(this)">
+                    View More
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View More Modal -->
+<div class="modal fade" id="viewMoreModal" tabindex="-1" aria-labelledby="viewMoreModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-white text-dark"> <!-- White background for modal -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewMoreModalLabel">Crew Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Teacher Details (PIC) -->
+                <table class="table table-bordered">
                     <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Class</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                        <tr class="table-primary text-center"> <!-- Blue background for section header -->
+                            <th colspan="2">Teacher (PIC) Details</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Iterate over the crewDetails list -->
-                        <tr th:each="detail : ${crewDetails}">
-                            <td th:text="${detail.session}">Session</td>
-                            <td th:text="${detail.className}">Class Name</td>
-                            <td>
-                                <!-- Display badge based on status -->
-                                <span th:classappend="${detail.status == 'Rejected' ? 'badge bg-danger' : (detail.status == 'Pending' ? 'badge bg-warning text-dark' : 'badge bg-success')}"
-                                      th:text="${detail.status}">
-                                    Status
-                                </span>
-                            </td>
-                            <td>
-                                <!-- View More Button -->
-                                <button type="button" class="btn btn-sm btn-info" th:attr="data-id=${detail.crewID}" onclick="viewMore(this)">
-                                    View More
-                                </button>
-                            </td>
+                        <tr>
+                            <th>Name</th>
+                            <td id="teacherName"></td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td id="teacherEmail"></td>
+                        </tr>
+                        <tr>
+                            <th>User ID</th>
+                            <td id="teacherUserID"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Application Details -->
+                <table class="table table-bordered mt-4">
+                    <thead>
+                        <tr class="table-primary text-center"> <!-- Blue background for section header -->
+                            <th colspan="2">Application Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>Teacher Name</th>
+                            <td id="applicationTeacherName"></td>
+                        </tr>
+                        <tr>
+                            <th>Teacher Email</th>
+                            <td id="applicationTeacherEmail"></td>
+                        </tr>
+                        <tr>
+                            <th>User ID</th>
+                            <td id="applicationTeacherUserID"></td>
+                        </tr>
+                        <tr>
+                            <th>Abilities</th>
+                            <td id="abilities"></td>
+                        </tr>
+                        <tr>
+                            <th>Class Name</th>
+                            <td id="className"></td>
+                        </tr>
+                        <tr>
+                            <th>Session</th>
+                            <td id="session"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -205,6 +280,8 @@
         </div>
     </div>
 </div>
+
+
 
     <!-- JavaScript for Sidebar Toggle -->
     <script>
@@ -222,6 +299,53 @@
             sidebarOverlay.classList.add('hidden');
         });
     </script>
+    
+<script>
+    document.getElementById('applyForm').addEventListener('submit', function() {
+        // Enable the disabled inputs before submission
+        document.getElementById('studentName').disabled = false;
+        document.getElementById('email').disabled = false;
+        document.getElementById('contactNo').disabled = false;
+    });
+</script>
+    
+<script th:inline="javascript">
+    function viewMore(button) {
+        // Get the crewID from the button's data-id attribute
+        var crewID = button.getAttribute('data-id');
+		console.log("crewID "+ crewID);
+	    var crewDetails = /*[[${crewDetails}]]*/ [];
+        // Find the crew object in your crewDetails array (use the crewID to get the corresponding crew data)
+        var crewDetail = crewDetails.find(function(detail) {
+            return detail.crewID == crewID;
+        });
+		
+        console.log("crewDetail " + crewDetail );
+        // Populate the modal with the data
+        if (crewDetail && crewDetail.teachers && crewDetail.teachers.length > 0) {
+        	var student = /*[[${user}]]*/ [];
+            var teacher = crewDetail.teachers[0]; // Assuming there is only one teacher per crew
+
+            // Fill in the teacher details (PIC)
+            document.getElementById('teacherName').innerText = teacher.name;
+            document.getElementById('teacherEmail').innerText = teacher.email;
+            document.getElementById('teacherUserID').innerText = teacher.userID;
+
+            // Fill in the application details
+            document.getElementById('applicationTeacherName').innerText = student.name;
+            document.getElementById('applicationTeacherEmail').innerText = student.email;
+            document.getElementById('applicationTeacherUserID').innerText = student.userID;
+            document.getElementById('abilities').innerText = crewDetail.abilities;
+            document.getElementById('className').innerText = crewDetail.className;
+            document.getElementById('session').innerText = student.session;
+        }
+
+        // Show the modal
+        var modal = new bootstrap.Modal(document.getElementById('viewMoreModal'));
+        modal.show();
+    }
+</script>
+    
 
     <!-- DataTables Initialization -->
     <script>

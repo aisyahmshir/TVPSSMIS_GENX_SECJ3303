@@ -2,7 +2,7 @@ package com.tvpss.model;
 
 import java.util.List;
 
-import com.tvpss.model.CrewModel.Session;
+import com.tvpss.model.CrewModel;
 
 public class SchoolModel {
     private List<Session> sessions;

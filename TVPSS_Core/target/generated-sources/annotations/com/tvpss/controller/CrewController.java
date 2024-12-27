@@ -12,20 +12,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.tvpss.model.CrewModel;
+import com.tvpss.model.School;
+import com.tvpss.model.SchoolModel;
 import com.tvpss.model.UserModel;
 import com.tvpss.service.CrewService;
 
 @Controller
 public class CrewController {
-	@GetMapping("/studentMainView")
+	@RequestMapping("/studentMainView")
 	public String home(Model model, HttpSession httpSession) {
 	    System.out.println("I'm in");
 
 	    // Get the userID from the session
 //	    String userID = (String) httpSession.getAttribute("userID");
-	    String userID = "2";
+	    String userID = "1";
 	    if (userID == null) {
 	        return "redirect:/login"; // Redirect to login if no userID in session
 	    }
@@ -34,7 +39,7 @@ public class CrewController {
 	    UserModel user = CrewService.getUserDetails(userID);
 
 	    // Fetch application details (crew information) from the service
-	    List<CrewModel> crewDetails = CrewService.getCrewDetails(userID);
+	    List<CrewModel> crewDetails = CrewService.getCrewDetailsWithTeachers(userID);
 
 	    if (user == null) {
 	        return "redirect:/login"; // Redirect if user details are not found
@@ -51,36 +56,79 @@ public class CrewController {
 	    return "crewVersionModule/studentMainView";
 	}
 
-	
-	@GetMapping("/teacherMainView")
-	public String teacherHome(Model model) {
-	    System.out.println("I'm in");
+    @PostMapping("/submitApplication")
+    public String submitApplication(
+            @RequestParam("studentName") String studentName,
+            @RequestParam("email") String email,
+            @RequestParam("contactNo") String contactNo,
+            @RequestParam("studentClass") String studentClass,
+            @RequestParam("abilities") String abilities,
+            @RequestParam("id") String id,
+            @RequestParam("schoolID") String schoolID,
+            Model model) {
 
-	    String role = "teacher";
-	    model.addAttribute("role", role);
+        // Calculate session based on the current year
+        int currentYear = java.time.Year.now().getValue();
+        String session = currentYear + "/" + (currentYear + 1);
 
-	    // Add dynamic data
-	    List<Map<String, Object>> schools = new ArrayList<>();
-	    Map<String, Object> school1 = new HashMap<>();
-	    school1.put("name", "SMK Pagoh");
-	    school1.put("crew", Arrays.asList("John Doe", "Jane Smith", "Michael Brown", "Emily White", "William Lee"));
-	    school1.put("teacher", "Mr. John");
-	    school1.put("address", "123 School Rd, City");
-	    school1.put("version", "Version 2");
+        // Set the status to "Pending"
+        String status = "Pending";
+        System.out.println("email "+ email);
+        // Call the service layer to insert the application details
+        boolean isInserted = CrewService.insertApplication(studentName, email, contactNo, studentClass, abilities, session, status, id, schoolID);
 
-	    Map<String, Object> school2 = new HashMap<>();
-	    school2.put("name", "Example School 2");
-	    school2.put("crew", Arrays.asList("Alice Johnson", "Bob Williams", "Charlie Davis"));
-	    school2.put("teacher", "Ms. Alice");
-	    school2.put("address", "456 School Ave, City");
-	    school2.put("version", "Version 2.0");
+        if (isInserted) {
+            model.addAttribute("message", "Application submitted successfully!");
+        } else {
+            model.addAttribute("message", "Failed to submit application. Please try again.");
+        }
 
-	    schools.add(school1);
+        return "forward:/studentMainView";
+    }
 
-	    model.addAttribute("schools", schools);
+    // END OF STUDENT CONTROLLER METHODS
+    
+    //START OF TEACHER CONTROLLER METHODS
+    
+    @GetMapping("/teacherMainView")
+    public String teacherHome(Model model) {
+        System.out.println("I'm in");
 
-	    return "crewVersionModule/teacherMainView";
-	}
+        String role = "teacher";
+        model.addAttribute("role", role);
+
+        // Fetch dynamic school data from CrewService
+//	    String userID = (String) httpSession.getAttribute("userID");
+	    String userID = "1";
+        School schoolInfo = CrewService.getSchoolDetailsByUserID(userID);
+        List<Map<String, Object>> schools = new ArrayList<>();
+        
+            Map<String, Object> schoolData = new HashMap<>();
+            schoolData.put("name", schoolInfo.getName());
+            schoolData.put("address", schoolInfo.getFullAddress());
+            schoolData.put("version", schoolInfo.getTvpssVersion());
+
+            // Get associated crew members with names
+            List<Map<String, Object>> crewsWithNames = CrewService.getCrewsWithNamesBySchoolId(schoolInfo.getSchoolID());
+            List<String> crewNames = new ArrayList<>();
+
+            for (Map<String, Object> crewData : crewsWithNames) {
+            	System.out.println("name is crewData "+ crewData.get("name"));
+                crewNames.add((String) crewData.get("name"));
+            }
+            schoolData.put("crew", crewNames);
+
+            // Get associated teacher
+            UserModel teacher = CrewService.getTeacherBySchoolId(schoolInfo.getSchoolID());
+            schoolData.put("teacher", teacher != null ? teacher.getName() : "N/A");
+
+            schools.add(schoolData);
+            System.out.println("school Data "+ schools);
+        model.addAttribute("schools", schools);
+
+        return "crewVersionModule/teacherMainView";
+    }
+
 	
 	@GetMapping("/teacherViewApplication")
 	public String teacherViewApplication(Model model) {

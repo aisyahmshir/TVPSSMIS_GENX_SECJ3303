@@ -1,5 +1,7 @@
 package com.tvpss.model;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public class UserModel {
@@ -33,7 +35,32 @@ public class UserModel {
         this.schoolID = schoolID;
     }
 
-    // Getters and setters
+    public UserModel(ResultSet rs) throws SQLException {
+        this.id = rs.getInt("id");
+        this.userID = rs.getString("userID");
+        this.name = rs.getString("name");
+        this.contactNo = rs.getString("contactNo");
+        this.email = rs.getString("email");
+        this.status = rs.getString("status");
+        this.role = rs.getString("role");
+        this.password = rs.getString("password");
+        this.lastActive = rs.getTimestamp("lastActive");
+        this.session = rs.getString("session");
+        this.districtID = rs.getInt("districtID");
+        this.schoolID = rs.getInt("schoolID");
+    }
+    
+    
+    public UserModel(int id, String name, String email, String role, int schoolID, String userID) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.schoolID = schoolID;
+        this.userID = userID;
+    }
+
+	// Getters and setters
     public int getId() {
 		return id;
 	}
