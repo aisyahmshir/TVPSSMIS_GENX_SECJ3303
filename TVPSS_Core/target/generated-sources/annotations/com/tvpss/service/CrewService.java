@@ -314,6 +314,48 @@ public class CrewService {
         }
         return null; // Return null if no school is found for the given userID
     }
+    
+    public static boolean submitTVPSSApplication(int schoolID, java.sql.Date dateApplied, String url, String status, int versionApplied) {
+        String insertQuery = "INSERT INTO `tvpssversionapplication`(`schoolID`, `dateApplied`, `url`, `versionApplied`) " +
+                             "VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+
+            stmt.setInt(1, schoolID);
+            stmt.setDate(2, dateApplied);
+            stmt.setString(3, url);
+            stmt.setInt(4, versionApplied);
+
+            int rowsAffected = stmt.executeUpdate(); // Execute the query and get affected rows
+            System.out.println("Record inserted successfully into tvpssversionapplication table.");
+            return rowsAffected > 0; // Return true if at least one row is affected
+        } catch (SQLException e) {
+            System.err.println("Error inserting record: " + e.getMessage());
+            return false; // Return false if there's an exception
+        }
+    }
+    
+    public static boolean checkPendingApplication(int schoolID) {
+        String query = "SELECT COUNT(*) FROM tvpssversionapplication WHERE schoolID = ? AND status = 'Pending'";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, schoolID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0;  // If count is greater than 0, there is at least one pending application
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Return false if no pending application is found or if an error occurs
+    }
+
+
 
 
 

@@ -13,8 +13,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tvpss.model.CrewModel;
 import com.tvpss.model.School;
@@ -100,13 +103,18 @@ public class CrewController {
         // Fetch dynamic school data from CrewService
 //	    String userID = (String) httpSession.getAttribute("userID");
 	    String userID = "1";
+
         School schoolInfo = CrewService.getSchoolDetailsByUserID(userID);
         List<Map<String, Object>> schools = new ArrayList<>();
         
             Map<String, Object> schoolData = new HashMap<>();
+            System.out.println("School ID "+ schoolInfo.getSchoolID());
+            schoolData.put("schoolID", schoolInfo.getSchoolID());
             schoolData.put("name", schoolInfo.getName());
             schoolData.put("address", schoolInfo.getFullAddress());
             schoolData.put("version", schoolInfo.getTvpssVersion());
+            schoolData.put("url", schoolInfo.getVersionImageURL());
+            Boolean checkSubmission = CrewService.checkPendingApplication(schoolInfo.getSchoolID().intValue());
 
             // Get associated crew members with names
             List<Map<String, Object>> crewsWithNames = CrewService.getCrewsWithNamesBySchoolId(schoolInfo.getSchoolID());
@@ -121,13 +129,42 @@ public class CrewController {
             // Get associated teacher
             UserModel teacher = CrewService.getTeacherBySchoolId(schoolInfo.getSchoolID());
             schoolData.put("teacher", teacher != null ? teacher.getName() : "N/A");
-
+            schoolData.put("checkStatus", checkSubmission);
             schools.add(schoolData);
-            System.out.println("school Data "+ schools);
+            System.out.println("school Data "+ checkSubmission);
         model.addAttribute("schools", schools);
 
         return "crewVersionModule/teacherMainView";
     }
+    
+    
+    
+    @PostMapping("/applyVersionUpgrade")
+    public String applyVersionUpgrade(@RequestParam("schoolID") int schoolID,
+                                                   @RequestParam("driveLink") String driveLink,
+                                                   @RequestParam("tvpssVersion") int version,
+                                                   RedirectAttributes redirectAttributes) {
+    	
+        java.sql.Date todayDate = new java.sql.Date(System.currentTimeMillis());
+        int id = 1;
+        String status = "Pending";
+        System.out.println("id "+schoolID);
+        System.out.println("link "+driveLink);
+        System.out.println("ver "+version);
+        boolean isSubmitted = CrewService.submitTVPSSApplication(schoolID,todayDate, driveLink,status, version);
+
+        // Set a redirect attribute to indicate success or failure
+        if (isSubmitted) {
+            redirectAttributes.addAttribute("status", "success");
+        } else {
+            redirectAttributes.addAttribute("status", "error");
+        }
+
+        // Redirect to the same page with the status parameter
+        return "redirect:/teacherMainView";
+    }
+
+
 
 	
 	@GetMapping("/teacherViewApplication")
