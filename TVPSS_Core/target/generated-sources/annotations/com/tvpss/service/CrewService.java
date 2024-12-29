@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.tvpss.model.CrewModel;
 import com.tvpss.model.School;
@@ -354,6 +355,105 @@ public class CrewService {
         }
         return false; // Return false if no pending application is found or if an error occurs
     }
+
+    
+    public static List<Map<String, Object>> getTVPSSApplicationCrew(int id) {
+        List<Map<String, Object>> crewDetails = new ArrayList<>();
+
+        String getSchoolIDQuery = 
+            "SELECT schoolID FROM user WHERE id = ?";
+        String getPendingCrewQuery = 
+            "SELECT c.crewID, c.abilities, c.status, c.session, c.className, c.schoolID, c.userID " +
+            "FROM tvpss_crew_info c WHERE c.schoolID = ? AND c.status = 'Pending'";
+        String getUserDetailsQuery = 
+            "SELECT id, name, email, contactNo FROM user WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // Step 1: Get schoolID
+            String schoolID = null;
+            try (PreparedStatement stmt = conn.prepareStatement(getSchoolIDQuery)) {
+                stmt.setInt(1, id);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        schoolID = rs.getString("schoolID");
+                    }
+                }
+            }
+
+            if (schoolID == null) {
+                throw new IllegalArgumentException("No schoolID found for the given id and userID");
+            }
+
+            // Step 2: Get crew details with status 'Pending'
+            List<Map<String, String>> pendingCrewList = new ArrayList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(getPendingCrewQuery)) {
+                stmt.setString(1, schoolID);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, String> crewMap = new HashMap<>();
+                        crewMap.put("crewID", rs.getString("crewID"));
+                        crewMap.put("abilities", rs.getString("abilities"));
+                        crewMap.put("status", rs.getString("status"));
+                        crewMap.put("session", rs.getString("session"));
+                        crewMap.put("className", rs.getString("className"));
+                        crewMap.put("schoolID", rs.getString("schoolID"));
+                        crewMap.put("userID", rs.getString("userID"));
+                        pendingCrewList.add(crewMap);
+                    }
+                }
+            }
+
+            // Step 3: Get user details for each userID from the crew list
+            for (Map<String, String> crew : pendingCrewList) {
+                try (PreparedStatement stmt = conn.prepareStatement(getUserDetailsQuery)) {
+                    stmt.setString(1, crew.get("userID"));
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            Map<String, Object> crewDetail = new HashMap<>(crew);
+                            crewDetail.put("userName", rs.getString("name"));
+                            crewDetail.put("userEmail", rs.getString("email"));
+                            crewDetail.put("userPhone", rs.getString("contactNo"));
+                            crewDetails.add(crewDetail);
+                        }
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return crewDetails;
+    }
+    
+    // New method to update student status in bulk
+    public static void updateStudentStatus(List<Long> studentIds, String status) {
+        // Dynamically construct the placeholders for the IN clause
+        String placeholders = studentIds.stream()
+                                         .map(id -> "?")
+                                         .collect(Collectors.joining(","));
+        
+        String updateStatusQuery = 
+            "UPDATE tvpss_crew_info SET status = ? WHERE crewID IN (" + placeholders + ")";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(updateStatusQuery)) {
+            
+            // Set the status parameter
+            stmt.setString(1, status);
+
+            // Set each student ID parameter
+            for (int i = 0; i < studentIds.size(); i++) {
+                stmt.setLong(i + 2, studentIds.get(i)); // Start from index 2 because index 1 is for `status`
+            }
+
+            // Execute the update query
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
 

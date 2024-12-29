@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
@@ -167,34 +170,60 @@ public class CrewController {
 
 
 	
-	@GetMapping("/teacherViewApplication")
-	public String teacherViewApplication(Model model) {
-	    System.out.println("I'm in");
+    @GetMapping("/teacherViewApplication")
+    public String teacherViewApplication(HttpSession session, Model model) {
+        System.out.println("I'm in");
 
-	    String role = "teacher";
-	    model.addAttribute("role", role);
+        // Get the userID from the session
+        //Integer userID = (Integer) session.getAttribute("userID");
+        Integer userID = 1;
+        if (userID == null) {
+            throw new IllegalStateException("User is not logged in.");
+        }
 
-	    // Add dynamic data
-	    List<Map<String, Object>> students = new ArrayList<>();
-	    Map<String, Object> student1 = new HashMap<>();
-	    student1.put("name", "John Doe");
-	    student1.put("class", "Grade 10 - A");
-	    student1.put("address", "123 Main St, City");
-	    student1.put("abilities", "John has shown excellent abilities in Math, Science, English, History, and Art. He enjoys learning new subjects and has a natural talent for problem-solving. His performance has been consistently outstanding, and he is always eager to help his classmates.");
+        // Fetch applications using the service
+        List<Map<String, Object>> applications = CrewService.getTVPSSApplicationCrew(userID);
+        Set<String> sessionValues = applications.stream()
+                .map(app -> (String) app.get("session"))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        
+        // Add role and dynamic data to the model
+        model.addAttribute("role", "teacher");
+        model.addAttribute("students", applications);
+        model.addAttribute("sessions", sessionValues); // Add session values to model
+        
+        System.out.println("students "+applications);
 
-	    Map<String, Object> student2 = new HashMap<>();
-	    student2.put("name", "Jane Smith");
-	    student2.put("class", "Grade 11 - B");
-	    student2.put("address", "456 Oak St, City");
-	    student2.put("abilities", "Jane excels in English, Science, and Math. Her passion for learning is evident in her constant curiosity and dedication to her studies. She also has a talent for music, which she actively participates in, contributing to school events and performances.");
+        return "crewVersionModule/teacherViewApplications";
+    }
+    
+    // Bulk approve/reject students
+    @PostMapping("/approveRejectStudents")
+    public String bulkApproveRejectStudents(@RequestParam("studentIds") List<Long> studentIds,
+                                            @RequestParam("action") String action, Model model) {
+        // Print the received parameters
+        System.out.println("Received studentIds: " + studentIds);
+        System.out.println("Received action: " + action);
+        if (studentIds == null || studentIds.isEmpty()) {
+            model.addAttribute("error", "Please select at least one student.");
+            return "redirect:/tvpss-core/teacherViewApplication";
+        }
 
-	    students.add(student1);
-	    students.add(student2);
+        // Validate the action (approve or reject)
+        if ("approve".equalsIgnoreCase(action)) {
+            CrewService.updateStudentStatus(studentIds, "Approved");
+            model.addAttribute("success", "Selected students have been approved.");
+        } else if ("reject".equalsIgnoreCase(action)) {
+            CrewService.updateStudentStatus(studentIds, "Rejected");
+            model.addAttribute("success", "Selected students have been rejected.");
+        } else {
+            model.addAttribute("error", "Invalid action.");
+        }
 
-	    model.addAttribute("students", students);
+        return "redirect:/teacherViewApplication";
+    }
 
-	    return "crewVersionModule/teacherViewApplications";
-	}
 	
 	 @GetMapping("/districtMainView")
 	    public String districtMainView(Model model) {
