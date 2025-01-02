@@ -135,7 +135,7 @@ public class CrewController {
             schoolData.put("checkStatus", checkSubmission);
             schools.add(schoolData);
             System.out.println("school Data "+ checkSubmission);
-        model.addAttribute("schools", schools);
+            model.addAttribute("schools", schools);
 
         return "crewVersionModule/teacherMainView";
     }
@@ -263,88 +263,59 @@ public class CrewController {
 	    }
 	 
 	 @GetMapping("/stateMainView")
-	 public String stateMainView(Model model) {
-	     System.out.println("I'm in");
+	 public String getSchoolsAndDistrictDetails(Model model) {
+		    // Step 1: Call the service to get schools and users
+		    Map<String, Object> result = CrewService.getSchoolsAndUsers();
 
-	     // List to store school data for the district
-	     List<Map<String, Object>> schools = new ArrayList<>();
-	     List<String> districts = new ArrayList<>();
+		    // Step 2: Extract the list of schools and users from the result
+		    List<School> schools = (List<School>) result.get("schools");
+		    List<UserModel> users = (List<UserModel>) result.get("users");
 
-	     // Sample data for 5 schools
-	     for (int i = 1; i <= 5; i++) {
-	         Map<String, Object> school = new HashMap<>();
-	         school.put("id", i); // Add an ID for each school
-	         school.put("name", "School " + i);
-	         school.put("address", "District " + i);
-	         school.put("version", "Version " + i);
-		     districts.add("District "+i);
+		    // Step 3: Extract the districtIDs from the schools
+		    List<Long> districtIDs = new ArrayList<>();
+		    for (School school : schools) {
+		    	System.out.println("districtID "+ school.getDistrictID());
+		        districtIDs.add(school.getDistrictID());
+		    }
 
-	         // Sample crew list for each school
-	         List<String> crewList = new ArrayList<>();
-	         crewList.add("Teacher A");
-	         crewList.add("Teacher B");
-	         crewList.add("Teacher C");
+		    // Step 4: Get district names based on districtIDs by calling the CrewService method
+		    List<String> districtNames = CrewService.getCrewNamesByDistrictIDs(districtIDs);
 
-	         // Add crew list to school data
-	         school.put("crew", crewList);
+		    // Step 5: Create a Map for easy lookup of Users by schoolID
+		    Map<Long, UserModel> userMap = new HashMap<>();
+		    for (UserModel user : users) {
+		    	System.out.println("user "+user.getName());
+		        userMap.put((long) user.getSchoolID(), user);  // Map schoolID to the corresponding user
+		    }
 
-	         // Sample image URL for each school
-	         String image = "https://via.placeholder.com/150?text=School+" + i;
-	         school.put("image", image);
+		    // Step 6: Add the user information to each school in the model (if needed)
+		    model.addAttribute("schools", schools);  // Schools list
+		    model.addAttribute("district", districtNames);  // District names list
+		    model.addAttribute("userMap", userMap);  // User map to be accessed in the view
 
-	         // Add the school to the list
-	         schools.add(school);
-	     }
+		    // Step 7: Return the view name to render
+		    return "crewVersionModule/stateMainView";  // Path to the HTML template
+		}
 
-	     // Add the schools data to the model for rendering
-	     model.addAttribute("schools", schools);
-
-	     // Add the districts to the model for the dropdown filter
-	     model.addAttribute("districts", districts);
-
-	     return "crewVersionModule/stateMainView"; // Path to the HTML template
-	 }
 	 
 	 @GetMapping("/viewCrewSchool/{id}")
 	 public String viewSchool(@PathVariable("id") int schoolId, Model model) {
 	     System.out.println("View school with ID: " + schoolId);
 
-	     // Find the school by ID (this would normally come from a database)
-	     Map<String, Object> selectedSchool = null;
+	     // Fetch school data using the service method
+	     Map<String, Object> schoolData = CrewService.getTVPSSCrewVersionInfo(schoolId);
 
-	     for (int i = 1; i <= 5; i++) {
-	         if (i == schoolId) {
-	             selectedSchool = new HashMap<>();
-	             selectedSchool.put("id", i);
-	             selectedSchool.put("name", "School " + i);
-	             selectedSchool.put("address", "Address " + i);
-	             selectedSchool.put("version", "Version " + i);
-
-	             // Crew list for the specific school
-	             List<String> crewList = new ArrayList<>();
-	             crewList.add("Teacher A");
-	             crewList.add("Teacher B");
-	             crewList.add("Teacher C");
-
-	             // Add crew list to school data
-	             selectedSchool.put("crew", crewList);
-
-	             // Image URL for the specific school
-	             String image = "https://via.placeholder.com/" + "School " + i;
-	             selectedSchool.put("image", image); // Use single URL instead of a list
-	             break; // Break after finding the school
-	         }
+	     if (schoolData == null || schoolData.isEmpty()) {
+	         model.addAttribute("error", "School not found");
+	         return "crewVersionModule/stateViewMore";
 	     }
+	     System.out.println("school data "+ schoolData);
 
-	     System.out.println(selectedSchool);
+	     // Add school data to the model
+	     model.addAttribute("school", schoolData);
 
-	     if (selectedSchool != null) {
-	         model.addAttribute("school", selectedSchool); // Add the selected school to the model
-	     } else {
-	         model.addAttribute("error", "School not found"); // If no school found
-	     }
-
-	     return "crewVersionModule/stateViewMore"; // Return to the school details page
+	     return "crewVersionModule/stateViewMore"; // Return to the view page
 	 }
+
 
 }

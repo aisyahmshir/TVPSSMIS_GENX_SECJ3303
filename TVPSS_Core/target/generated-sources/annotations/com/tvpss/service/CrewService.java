@@ -453,6 +453,168 @@ public class CrewService {
             e.printStackTrace();
         }
     }
+    
+    
+    public static Map<String, Object> getSchoolsAndUsers() {
+        Map<String, Object> result = new HashMap<>();
+        List<School> schools = new ArrayList<>();
+        List<UserModel> users = new ArrayList<>();
+
+        String query = "SELECT s.schoolID, " +
+                "s.name AS schoolName, " +
+                "s.state, " +
+                "s.fullAddress, " +
+                "s.contactNo AS schoolContactNo, " +
+                "s.versionImageURL, " +
+                "s.logo, " +
+                "s.schoolPic, " +
+                "s.districtID AS schoolDistrictID, " +
+                "s.tvpssVersion, " +
+                "u.id AS userID, " +
+                "u.userID AS userUserID, " +
+                "u.name AS userName, " +
+                "u.contactNo AS userContactNo, " +
+                "u.email, " +
+                "u.status, " +
+                "u.role, " +
+                "u.password, " +
+                "u.lastActive, " +
+                "u.session, " +
+                "u.districtID AS userDistrictID, " +
+                "u.schoolID AS userSchoolID " +
+                "FROM school s " +
+                "INNER JOIN user u ON u.schoolID = s.schoolID " +
+                "WHERE u.role = 'Teacher' AND u.schoolID = s.schoolID";
+
+
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+        	     PreparedStatement stmt = conn.prepareStatement(query);
+        	     ResultSet rs = stmt.executeQuery()) {
+
+        	    while (rs.next()) {
+        	        // Populate School object
+        	        School school = new School();
+        	        school.setSchoolID(rs.getLong("schoolID"));
+        	        school.setName(rs.getString("schoolName"));
+        	        school.setState(rs.getString("state"));
+        	        school.setFullAddress(rs.getString("fullAddress"));
+        	        school.setContactNo(rs.getString("schoolContactNo"));
+        	        school.setVersionImageURL(rs.getString("versionImageURL"));
+        	        school.setLogo(rs.getBytes("logo"));
+        	        school.setSchoolPic(rs.getBytes("schoolPic"));
+        	        school.setDistrictID(rs.getLong("schoolDistrictID"));
+        	        school.setTvpssVersion(rs.getInt("tvpssVersion"));
+
+        	        // Add school to list
+        	        schools.add(school);
+
+        	        // Populate UserModel object
+        	        if (rs.getInt("userID") != 0) { // Ensure there's user data
+        	            UserModel user = new UserModel();
+        	            user.setId(rs.getInt("userID"));
+        	            user.setUserID(rs.getString("userUserID"));
+        	            user.setName(rs.getString("userName"));
+        	            user.setContactNo(rs.getString("userContactNo"));
+        	            user.setEmail(rs.getString("email"));
+        	            user.setStatus(rs.getString("status"));
+        	            user.setRole(rs.getString("role"));
+        	            user.setPassword(rs.getString("password"));
+        	            user.setLastActive(rs.getTimestamp("lastActive"));
+        	            user.setSession(rs.getString("session"));
+        	            user.setDistrictID(rs.getInt("userDistrictID"));
+        	            user.setSchoolID(rs.getInt("userSchoolID"));
+
+        	            // Add user to list
+        	            users.add(user);
+        	        }
+        	    }
+        	} catch (SQLException e) {
+        	    e.printStackTrace();
+        	}
+
+
+        // Add lists to the result map
+        result.put("schools", schools);
+        result.put("users", users);
+
+        return result;
+    }
+    
+    public static List<String> getCrewNamesByDistrictIDs(List<Long> districtIDs) {
+        List<String> crewNames = new ArrayList<>();
+        
+        // Build the SQL query with a dynamic number of ? placeholders
+        StringBuilder query = new StringBuilder("SELECT name FROM district WHERE districtID IN (");
+        for (int i = 0; i < districtIDs.size(); i++) {
+            query.append("?");
+            if (i < districtIDs.size() - 1) {
+                query.append(", ");
+            }
+        }
+        query.append(")");
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+
+            // Set each districtID as a separate parameter
+            for (int i = 0; i < districtIDs.size(); i++) {
+                stmt.setLong(i + 1, districtIDs.get(i)); // Use setLong for Long type
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    crewNames.add(rs.getString("name"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return crewNames;
+    }
+
+    public static Map<String, Object> getTVPSSCrewVersionInfo(int schoolId) {
+        Map<String, Object> schoolData = new HashMap<>();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // Query to get school information
+            String schoolQuery = "SELECT * FROM school WHERE schoolID = ?";
+            try (PreparedStatement schoolStmt = conn.prepareStatement(schoolQuery)) {
+                schoolStmt.setInt(1, schoolId);
+
+                try (ResultSet rs = schoolStmt.executeQuery()) {
+                    if (rs.next()) {
+                        schoolData.put("id", rs.getInt("schoolID"));
+                        schoolData.put("name", rs.getString("name"));
+                        schoolData.put("address", rs.getString("fullAddress"));
+                        schoolData.put("version", rs.getString("tvpssVersion"));
+                        schoolData.put("image", rs.getString("versionImageURL"));
+                    }
+                }
+            }
+
+            // Get associated crew members with names
+            List<Map<String, Object>> crewsWithNames = getCrewsWithNamesBySchoolId((long) schoolId);
+            List<String> crewNames = new ArrayList<>();
+
+            for (Map<String, Object> crewData : crewsWithNames) {
+                System.out.println("Crew name: " + crewData.get("name"));
+                crewNames.add((String) crewData.get("name"));
+            }
+            schoolData.put("crew", crewNames);
+
+            // Get associated teacher
+            UserModel teacher = getTeacherBySchoolId((long) schoolId);
+            schoolData.put("teacher", teacher != null ? teacher.getName() : "N/A");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return schoolData;
+    }
+
 
 
 

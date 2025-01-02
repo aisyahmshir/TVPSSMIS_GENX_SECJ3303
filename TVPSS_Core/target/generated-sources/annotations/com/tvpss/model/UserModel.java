@@ -59,6 +59,11 @@ public class UserModel {
         this.schoolID = schoolID;
         this.userID = userID;
     }
+    
+
+	public UserModel() {
+		// TODO Auto-generated constructor stub
+	}
 
 	// Getters and setters
     public int getId() {
