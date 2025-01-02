@@ -615,6 +615,125 @@ public class CrewService {
         return schoolData;
     }
 
+    
+    public static Integer getDistrictIdByUserId(Integer userID) {
+        if (userID == null) {
+            throw new IllegalStateException("User ID cannot be null.");
+        }
+
+        Integer districtID = null;
+
+        // Database connection
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // SQL query to fetch the districtID
+            String query = "SELECT districtID FROM user WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, userID);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        districtID = rs.getInt("districtID");
+                    } else {
+                        throw new IllegalStateException("No district found for the provided user ID.");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to fetch district ID from the database.");
+        }
+
+        return districtID;
+    }
+    
+    public static Map<String, Object> getSchoolsAndUsersByDistrict(Integer districtID) {
+        Map<String, Object> result = new HashMap<>();
+        List<School> schools = new ArrayList<>();
+        List<UserModel> users = new ArrayList<>();
+
+        String query = "SELECT s.schoolID, " +
+                "s.name AS schoolName, " +
+                "s.state, " +
+                "s.fullAddress, " +
+                "s.contactNo AS schoolContactNo, " +
+                "s.versionImageURL, " +
+                "s.logo, " +
+                "s.schoolPic, " +
+                "s.districtID AS schoolDistrictID, " +
+                "s.tvpssVersion, " +
+                "u.id AS userID, " +
+                "u.userID AS userUserID, " +
+                "u.name AS userName, " +
+                "u.contactNo AS userContactNo, " +
+                "u.email, " +
+                "u.status, " +
+                "u.role, " +
+                "u.password, " +
+                "u.lastActive, " +
+                "u.session, " +
+                "u.districtID AS userDistrictID, " +
+                "u.schoolID AS userSchoolID " +
+                "FROM school s " +
+                "INNER JOIN user u ON u.schoolID = s.schoolID " +
+                "WHERE u.role = 'Teacher' AND s.districtID = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            // Set the districtID in the query
+            stmt.setInt(1, districtID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    // Populate School object
+                    School school = new School();
+                    school.setSchoolID(rs.getLong("schoolID"));
+                    school.setName(rs.getString("schoolName"));
+                    school.setState(rs.getString("state"));
+                    school.setFullAddress(rs.getString("fullAddress"));
+                    school.setContactNo(rs.getString("schoolContactNo"));
+                    school.setVersionImageURL(rs.getString("versionImageURL"));
+                    school.setLogo(rs.getBytes("logo"));
+                    school.setSchoolPic(rs.getBytes("schoolPic"));
+                    school.setDistrictID(rs.getLong("schoolDistrictID"));
+                    school.setTvpssVersion(rs.getInt("tvpssVersion"));
+
+                    // Add school to list
+                    schools.add(school);
+
+                    // Populate UserModel object
+                    if (rs.getInt("userID") != 0) { // Ensure there's user data
+                        UserModel user = new UserModel();
+                        user.setId(rs.getInt("userID"));
+                        user.setUserID(rs.getString("userUserID"));
+                        user.setName(rs.getString("userName"));
+                        user.setContactNo(rs.getString("userContactNo"));
+                        user.setEmail(rs.getString("email"));
+                        user.setStatus(rs.getString("status"));
+                        user.setRole(rs.getString("role"));
+                        user.setPassword(rs.getString("password"));
+                        user.setLastActive(rs.getTimestamp("lastActive"));
+                        user.setSession(rs.getString("session"));
+                        user.setDistrictID(rs.getInt("userDistrictID"));
+                        user.setSchoolID(rs.getInt("userSchoolID"));
+
+                        // Add user to list
+                        users.add(user);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Add lists to the result map
+        result.put("schools", schools);
+        result.put("users", users);
+
+        return result;
+    }
+
+
 
 
 

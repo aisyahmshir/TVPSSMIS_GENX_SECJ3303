@@ -224,44 +224,51 @@ public class CrewController {
         return "redirect:/teacherViewApplication";
     }
 
-	
 	 @GetMapping("/districtMainView")
-	    public String districtMainView(Model model) {
-	        System.out.println("I'm in");
-
-	        // Add dynamic data for school list
-	        List<Map<String, Object>> schools = new ArrayList<>();
-
-	        // Data for 5 schools
-	        for (int i = 1; i <= 5; i++) {
-	            Map<String, Object> school = new HashMap<>();
-	            school.put("name", "School " + i);
-	            school.put("address", "Address " + i);
-	            school.put("version", "Version " + i);
-
-	            // Crew list for each school
-	            List<String> crewList = new ArrayList<>();
-	            crewList.add("Teacher A");
-	            crewList.add("Teacher B");
-	            crewList.add("Teacher C");
-
-	            // Add crew list to school data
-	            school.put("crew", crewList);
-
-	            // Single image URL for each school
-	            String image = "https://via.placeholder.com/"+"School " + i; // Example URL for image
-	            school.put("image", image); // Use single URL instead of a list
-
-	            // Add the school to the list
-	            schools.add(school);
+	 public String districtMainView(Model model) {
+		    // Step 1: Call the service to get schools and users
+	        //Integer userID = (Integer) session.getAttribute("userID");
+	        Integer userID = 1;
+	        if (userID == null) {
+	            throw new IllegalStateException("User is not logged in.");
 	        }
+	        Integer districtID = CrewService.getDistrictIdByUserId(userID);
+	        System.out.println("District ID: " + districtID);
+	        
+		    Map<String, Object> result = CrewService.getSchoolsAndUsersByDistrict(districtID);
 
-	        // Add the list of schools to the model
-	        model.addAttribute("schools", schools);
+		    // Step 2: Extract the list of schools and users from the result
+		    List<School> schools = (List<School>) result.get("schools");
+		    List<UserModel> users = (List<UserModel>) result.get("users");
 
-	        return "crewVersionModule/districtMainView"; // Path to the HTML template
-	    }
+		    // Step 3: Extract the districtIDs from the schools
+		    List<Long> districtIDs = new ArrayList<>();
+		    for (School school : schools) {
+		    	System.out.println("districtID "+ school.getDistrictID());
+		        districtIDs.add(school.getDistrictID());
+		    }
+
+		    // Step 4: Get district names based on districtIDs by calling the CrewService method
+		    List<String> districtNames = CrewService.getCrewNamesByDistrictIDs(districtIDs);
+
+		    // Step 5: Create a Map for easy lookup of Users by schoolID
+		    Map<Long, UserModel> userMap = new HashMap<>();
+		    for (UserModel user : users) {
+		    	System.out.println("user "+user.getName());
+		        userMap.put((long) user.getSchoolID(), user);  // Map schoolID to the corresponding user
+		    }
+
+		    // Step 6: Add the user information to each school in the model (if needed)
+		    model.addAttribute("schools", schools);  // Schools list
+		    model.addAttribute("district", districtNames);  // District names list
+		    model.addAttribute("userMap", userMap);  // User map to be accessed in the view
+
+		    // Step 7: Return the view name to render
+		    return "crewVersionModule/districtMainView";  // Path to the HTML template
+		}
 	 
+	 
+	 //STATE'S CONTROLLER METHODS
 	 @GetMapping("/stateMainView")
 	 public String getSchoolsAndDistrictDetails(Model model) {
 		    // Step 1: Call the service to get schools and users
@@ -299,9 +306,19 @@ public class CrewController {
 
 	 
 	 @GetMapping("/viewCrewSchool/{id}")
-	 public String viewSchool(@PathVariable("id") int schoolId, Model model) {
+	 public String viewSchool(@PathVariable("id") int schoolId,
+			 HttpSession session,
+			 Model model) {
 	     System.out.println("View school with ID: " + schoolId);
-
+		 String viewPath = "";
+		 //String role = (String) session.getAttribute("role");
+		 String role = "District";
+		 if ("District".equalsIgnoreCase(role)) {
+		        viewPath = "/districtMainView";
+		        System.out.println("view is "+ viewPath);
+		    } else if ("State".equalsIgnoreCase(role)) {
+		        viewPath = "/stateMainView";
+		    } 
 	     // Fetch school data using the service method
 	     Map<String, Object> schoolData = CrewService.getTVPSSCrewVersionInfo(schoolId);
 
@@ -313,8 +330,9 @@ public class CrewController {
 
 	     // Add school data to the model
 	     model.addAttribute("school", schoolData);
+	     model.addAttribute("viewPath", viewPath);
 
-	     return "crewVersionModule/stateViewMore"; // Return to the view page
+	     return "crewVersionModule/viewMore"; // Return to the view page
 	 }
 
 
