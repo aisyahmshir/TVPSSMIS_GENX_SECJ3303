@@ -841,6 +841,8 @@ public class CrewService {
             "SELECT schoolID FROM tvpssversionapplication WHERE id = ?";
         String updateSchoolVersionQuery = 
             "UPDATE school SET tvpssVersion = tvpssVersion + 1 WHERE schoolID = ?";
+        String getEmailQuery = 
+            "SELECT email FROM user WHERE schoolID = ? AND role = 'Teacher'";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
             // Set auto-commit to false for transaction management
@@ -880,10 +882,26 @@ public class CrewService {
                 }
             }
 
+            // Fetch the email of the teacher
+            String teacherEmail = null;
+            try (PreparedStatement getEmailStmt = conn.prepareStatement(getEmailQuery)) {
+                getEmailStmt.setInt(1, schoolID);
+                try (ResultSet rs = getEmailStmt.executeQuery()) {
+                    if (rs.next()) {
+                        teacherEmail = rs.getString("email");
+                    }
+                }
+            }
+
             // Commit the transaction
             conn.commit();
+
+            // If an email is found, send the approval email
+            if (teacherEmail != null) {
+                EmailService.sendApprovalEmail(teacherEmail);
+            }
             return true;
-        } catch (SQLException e) {
+        } catch (SQLException | UnsupportedEncodingException e) {
             e.printStackTrace();
             return false; // Return false if an exception occurs
         }
