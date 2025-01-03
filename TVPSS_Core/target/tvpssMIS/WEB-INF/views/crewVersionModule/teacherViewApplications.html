@@ -97,31 +97,58 @@ display:inline !important;
                         <i class="fas fa-arrow-left"></i> Back
                     </a>
                 </div>
-
+			<div class="mb-4">
+			    <label for="sessionFilter" class="font-bold mr-2">Filter by Session:</label>
+			    <select id="sessionFilter" class="border rounded px-4 py-2">
+			        <option th:value="All">All</option>
+			        <option th:each="sessioning : ${sessions}" th:value="${sessioning}" th:text="${sessioning}"></option>
+			    </select>
+			</div>
                 <!-- DataTable -->
-                <table id="resultTable" class="display" style="width:100%">
-                    <thead>
-                        <tr class="bg-blue-500 text-white">
-                            <th>Student Name</th>
-                            <th>Class</th>
-                            <th>Student Address</th>
-                            <th>Student Abilities</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="student : ${students}">
-                            <td th:text="${student.name}"></td>
-                            <td th:text="${student.class}"></td>
-                            <td th:text="${student.address}"></td>
-                            <td th:text="${student.abilities}"></td>
-                            <td>
-                                <button class="btn btn-success approve-btn"><i class="fas fa-check"></i> Approve</button>
-                                <button class="btn btn-danger reject-btn" data-student-id="${student.id}"><i class="fas fa-times"></i> Reject</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+				<form id="bulkRejectForm" method="POST" th:action="@{/approveRejectStudents}">
+				    <table id="resultTable" class="display" style="width:100%">
+				        <thead>
+				            <tr class="bg-blue-500 text-white">
+				                <th><input type="checkbox" id="selectAll"></th>
+				                <th>Student Name</th>
+				                <th>Class</th>
+				                <th>Session</th> <!-- Add a session column -->
+				             	<th>Student Abilities</th>
+				                <th>Student Email</th>
+				                <th>Action</th>
+				            </tr>
+				        </thead>
+				        <tbody>
+				            <tr th:each="student : ${students}">
+								<td style="width: 5%; text-align: center;">
+								    <input type="checkbox" class="select-student" name="studentIds"  th:value="${student.crewID}">
+								</td>
+				                <td th:text="${student.userName}"></td>
+				                <td th:text="${student.className}"></td>
+				                <td th:text="${student.session}"></td> <!-- Add session value here -->
+				            	<td th:text="${student.abilities}"></td>
+				                <td th:text="${student.userEmail}"></td>
+				                <td> 
+								<button type="button" class="btn btn-success approve-btn mb-1" 
+								        th:value="${student.crewID}" 
+								        data-action="approve">
+								    <i class="fas fa-check"></i> Approve
+								</button>
+								<button type="button" class="btn btn-danger reject-btn" 
+								        th:value="${student.crewID}" 
+								        data-action="reject">
+								    <i class="fas fa-times"></i> Reject
+								</button>
+				                </td>
+				            </tr>
+				        </tbody>
+				    </table>
+				
+			    <div class="mt-4">
+			        <button type="submit" name="action" value="approve" class="btn btn-success">Approve Selected</button>
+			        <button type="submit" name="action" value="reject" class="btn btn-danger">Reject Selected</button>
+			    </div>
+				</form>
 
                 <!-- Confirmation Modal for Reject -->
                 <div id="confirmationModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 hidden">
@@ -143,6 +170,37 @@ display:inline !important;
                 <p>Ministry of Education | TVPSS Application Portal</p>
             </footer>
         </div>
+        
+        
+        <!-- Modal -->
+<div id="noSelectionModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-1/3">
+        <h2 class="text-lg font-bold text-gray-800">No Students Selected</h2>
+        <p class="mt-2 text-sm text-gray-600">Please select at least one student before proceeding.</p>
+        <div class="mt-4 flex justify-end">
+            <button id="closeModalButton" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+        
+        
+<!-- Success/Error Modal -->
+<div id="statusModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 hidden">
+    <div class="flex justify-center items-center h-full">
+        <div class="bg-white p-6 rounded-lg w-1/3 relative">
+            <h2 id="statusModalTitle" class="text-2xl font-bold mb-4"></h2>
+            <p id="statusModalMessage" class="mb-4"></p>
+            <div class="flex justify-end">
+                <button id="closeStatusModal" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-700">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
     </div>
 
     <!-- Sidebar Toggle Script -->
@@ -166,63 +224,178 @@ display:inline !important;
     </script>
 
     <!-- DataTable Initialization Script -->
-    <script>
+<script>
+$(document).ready(function() {
+    // Initialize the DataTable and assign it to a variable
+    const table = $('#resultTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'csv',
+                text: 'Download CSV',
+                className: 'btn dt-button'
+            },
+            {
+                extend: 'excel',
+                text: 'Download Excel',
+                className: 'btn dt-button'
+            },
+            {
+                extend: 'pdf',
+                text: 'Download PDF',
+                className: 'btn dt-button'
+            },
+            {
+                extend: 'print',
+                text: 'Print',
+                exportOptions: {
+                    columns: ':not(:first-child)'
+                }
+            }
+        ],
+        paging: true,
+        searching: true,
+        ordering: true,
+        responsive: true,
+        columnDefs: [
+            { targets: [0], orderable: false } // Disable ordering for the checkbox column
+        ],
+        lengthMenu: [
+            [5, 10, 25, 50, 100],
+            ['5 rows', '10 rows', '25 rows', '50 rows', '100 rows']
+        ]
+    });
+
+    // Handle session filtering
+    $('#sessionFilter').on('change', function () {
+        const selectedSession = $(this).val();
+        console.log(selectedSession);
+
+        if (selectedSession === 'All') {
+        	console.log("im in");
+            table.columns(3).search('').draw(); // Show all rows if "All" is selected
+        } else {
+            table.columns(3).search(selectedSession).draw(); // Search in the 4th column (index 3 for `Session`)
+        }
+    });
         $(document).ready(function() {
-            $('#resultTable').DataTable({
-                dom: 'Bfrtip',
-                buttons: [
-                    {
-                        extend: 'csv',
-                        text: 'Download CSV', // Label the button as "Download CSV"
-                        className: 'btn dt-button' // Add Bootstrap button styling
+            function showModal(title, message) {
+                $('#statusModalTitle').text(title);
+                $('#statusModalMessage').text(message);
+                $('#statusModal').removeClass('hidden');
+            }
+
+            // Close the modal on button click
+            $('#closeStatusModal').on('click', function () {
+                $('#statusModal').addClass('hidden');
+                location.reload(); // Optional: Refresh the page after closing the modal
+            });
+        	
+        	
+        	
+        	
+            // Select All Checkbox Functionality
+            $('#selectAll').on('click', function() {
+                const isChecked = $(this).is(':checked');
+                $('.select-student').prop('checked', isChecked);
+            });
+
+            // Handle Bulk Approve and Reject Actions
+            $('#bulkRejectForm').on('submit', function(event) {
+            	console.log("Im here at bulkReject")
+                const selectedStudents = $('.select-student:checked');
+                if (selectedStudents.length === 0) {
+                    // Show the "No Selection" modal when no student is selected
+                    $('#noSelectionModal').removeClass('hidden'); // Remove hidden class to show modal
+                    event.preventDefault();
+                    return false;
+                }
+             // Log the values of the selected students
+                selectedStudents.each(function() {
+                    console.log("Selected student ID: " + $(this).val()); // Log each student's ID
+                });
+
+                const action = $(document.activeElement).val(); // Determine the clicked button
+                if (action === 'approve') {
+                    this.action = "/TVPSS_Core/approveRejectStudents" ; // Correct endpoint for bulk approve
+                    $('#action').val('approve'); // Set the action parameter in the form
+                } else if (action === 'reject') {
+                    this.action = "/TVPSS_Core/approveRejectStudents" ;  // Correct endpoint for bulk reject
+                    $('#action').val('reject'); // Set the action parameter in the form
+                }
+            });
+
+            // Close the "No Selection" modal when the OK button is clicked
+            $('#closeModalButton').on('click', function() {
+                $('#noSelectionModal').addClass('hidden'); // Add hidden class to hide modal
+            });
+
+            // Handle single student approve/reject actions
+            $('.approve-btn').on('click', function () {
+            	const studentId = $(this).val(); // Get student ID from the value attribute
+                const action = $(this).data('action'); // Get action (approve/reject)
+
+                // Send AJAX POST request
+                $.ajax({
+                    url: '/TVPSS_Core/approveRejectStudents',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: {
+                        studentIds: studentId, // Pass single student ID
+                        action: action         // Pass the action (approve/reject)
                     },
-                    {
-                        extend: 'excel',
-                        text: 'Download Excel', // Label the button as "Download Excel"
-                        className: 'btn dt-button' // Add Bootstrap button styling
+                    success: function (response) {
+                        // Handle success response (e.g., show success message)
+                        showModal('Success', `Student has been ${action}d successfully.`);
+                        location.reload(); // Reload page to reflect changes
                     },
-                    {
-                        extend: 'pdf',
-                        text: 'Download PDF', // Label the button as "Download Excel"
-                        className: 'btn dt-button' // Add Bootstrap button styling
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        exportOptions: {
-                            columns: ':not(:last-child)'  // Exclude the last column from the print
-                        }
+                    error: function (xhr, status, error) {
+                        // Handle error response (e.g., show error message)
+                        showModal('Error', `Failed to ${action} the Student. Please try again.`);
+                        console.error(error);
                     }
-                ],
-                paging: true,
-                searching: true,
-                ordering: true,
-                responsive:true,
-                columnDefs: [
-                    { targets: 3, width: '30%' }
-                ],
-                lengthMenu: [   // Set up the row selection options
-                    [5, 10, 25, 50, 100],  // Number of rows options
-                    ['5 rows','10 rows', '25 rows', '50 rows', '100 rows']  // Labels for the options
-                ]
+                });
+            });
+
+            // Reject confirmation modal
+            let studentIdToReject = null;
+            $('.reject-btn').on('click', function () {
+                studentIdToReject = $(this).val(); // Store student ID
+                $('#confirmationModal').removeClass('hidden'); // Show modal
+            });
+
+            // Confirm rejection
+            $('#confirmReject').on('click', function () {
+            	console.log("val is "+studentIdToReject);
+                if (studentIdToReject) {
+                    $.ajax({
+                        url: '/TVPSS_Core/approveRejectStudents',
+                        type: 'POST',
+                        contentType: 'application/x-www-form-urlencoded',
+                        data: {
+                            studentIds: studentIdToReject, // Pass single student ID
+                            action: 'reject'              // Hardcoded to reject
+                        },
+                        success: function (response) {
+                            showModal('Success', `Student has been Rejected successfully.`);
+                            $('#confirmationModal').addClass('hidden'); // Close modal
+                            location.reload(); // Reload page to reflect changes
+                        },
+                        error: function (xhr, status, error) {
+                        	showModal('Error', `Failed to Reject the Student. Please try again.`);
+                            console.error(error);
+                        }
+                    });
+                }
+            });
+
+            $('#cancelReject').on('click', function() {
+                $('#confirmationModal').addClass('hidden');
             });
         });
 
-        let studentIdToReject = null;
-        $('.reject-btn').on('click', function() {
-            studentIdToReject = $(this).data('student-id');
-            $('#confirmationModal').removeClass('hidden');
-        });
+    });
+</script>
 
-        $('#confirmReject').on('click', function() {
-            if (studentIdToReject) {
-                window.location.href = '/reject-student/' + studentIdToReject;
-            }
-        });
-
-        $('#cancelReject').on('click', function() {
-            $('#confirmationModal').addClass('hidden');
-        });
-    </script>
 </body>
 </html>

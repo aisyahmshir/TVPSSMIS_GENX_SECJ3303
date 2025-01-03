@@ -1,5 +1,6 @@
 package com.tvpss.service;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -733,7 +734,225 @@ public class CrewService {
         return result;
     }
 
+    public static List<Map<String, Object>> getTVPSSVersionApplication(int userId) {
+        List<Map<String, Object>> applicationDetails = new ArrayList<>();
 
+        // Queries
+        String getDistrictIDQuery =
+            "SELECT districtID FROM user WHERE id = ?";
+        String getApplicationQuery =
+            "SELECT v.id, v.schoolID, v.dateApplied, v.url, v.status, v.versionApplied " +
+            "FROM tvpssversionapplication v " +
+            "JOIN school s ON v.schoolID = s.schoolID " +
+            "WHERE s.districtID = ? AND status = 'Pending'";
+        String getSchoolDetailsQuery =
+            "SELECT schoolID, name AS schoolName, fullAddress, contactNo, versionImageURL FROM school WHERE schoolID = ?";
+        String getTeacherDetailsQuery =
+            "SELECT id, name, email, contactNo FROM user WHERE role = 'Teacher' AND schoolID = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // Step 1: Get districtID for the given user ID
+            String districtID = null;
+            try (PreparedStatement stmt = conn.prepareStatement(getDistrictIDQuery)) {
+                stmt.setInt(1, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        districtID = rs.getString("districtID");
+                    }
+                }
+            }
+
+            if (districtID == null) {
+                throw new IllegalArgumentException("No districtID found for the given user ID");
+            }
+
+            // Step 2: Get application details matching the districtID
+            List<Map<String, String>> applicationList = new ArrayList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(getApplicationQuery)) {
+                stmt.setString(1, districtID);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, String> appMap = new HashMap<>();
+                        appMap.put("id", rs.getString("id"));
+                        appMap.put("schoolID", rs.getString("schoolID"));
+                        appMap.put("dateApplied", rs.getString("dateApplied"));
+                        appMap.put("url", rs.getString("url"));
+                        appMap.put("status", rs.getString("status"));
+                        appMap.put("versionApplied", rs.getString("versionApplied"));
+                        applicationList.add(appMap);
+                    }
+                }
+            }
+
+            // Step 3: For each application, fetch school details and teacher details
+            for (Map<String, String> application : applicationList) {
+                Map<String, Object> applicationDetail = new HashMap<>(application);
+
+                // Fetch school details
+                try (PreparedStatement stmt = conn.prepareStatement(getSchoolDetailsQuery)) {
+                    stmt.setString(1, application.get("schoolID"));
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                        	System.out.println("school "+ rs.getString("schoolName"));
+                            applicationDetail.put("schoolName", rs.getString("schoolName"));
+                            applicationDetail.put("schoolAddress", rs.getString("fullAddress"));
+                            applicationDetail.put("schoolContact", rs.getString("contactNo"));
+                        }
+                    }
+                }
+
+                // Fetch teacher details associated with the application
+                List<Map<String, String>> teacherDetails = new ArrayList<>();
+                try (PreparedStatement stmt = conn.prepareStatement(getTeacherDetailsQuery)) {
+                    stmt.setString(1, application.get("schoolID"));
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        while (rs.next()) {
+                            Map<String, String> teacher = new HashMap<>();
+                            System.out.println("teacher "+ rs.getString("name"));
+                            teacher.put("id", rs.getString("id"));
+                            teacher.put("teacherName", rs.getString("name"));
+                            teacher.put("email", rs.getString("email"));
+                            teacher.put("contactNo", rs.getString("contactNo"));
+                            teacherDetails.add(teacher);
+                        }
+                    }
+                }
+                applicationDetail.put("teacherDetails", teacherDetails);
+
+                // Add to the final details list
+                applicationDetails.add(applicationDetail);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return applicationDetails;
+    }
+
+
+
+    // Update the status of the application to 'Approved' based on the given id
+ // Update the status of the application to 'Approved' and increment the TVPSS_Version for the related school
+    public static boolean updateApproveApplicationTvpssVersion(int id) {
+        String updateStatusQuery = 
+            "UPDATE tvpssversionapplication SET status = 'Approved' WHERE id = ?";
+        String getSchoolIdQuery = 
+            "SELECT schoolID FROM tvpssversionapplication WHERE id = ?";
+        String updateSchoolVersionQuery = 
+            "UPDATE school SET tvpssVersion = tvpssVersion + 1 WHERE schoolID = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // Set auto-commit to false for transaction management
+            conn.setAutoCommit(false);
+
+            // Update the status to 'Approved'
+            try (PreparedStatement updateStatusStmt = conn.prepareStatement(updateStatusQuery)) {
+                updateStatusStmt.setInt(1, id);
+                int rowsAffected = updateStatusStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    conn.rollback();
+                    return false; // No rows updated
+                }
+            }
+
+            // Get the schoolID associated with the application
+            int schoolID;
+            try (PreparedStatement getSchoolIdStmt = conn.prepareStatement(getSchoolIdQuery)) {
+                getSchoolIdStmt.setInt(1, id);
+                try (ResultSet rs = getSchoolIdStmt.executeQuery()) {
+                    if (rs.next()) {
+                        schoolID = rs.getInt("schoolID");
+                    } else {
+                        conn.rollback();
+                        return false; // No schoolID found
+                    }
+                }
+            }
+
+            // Increment the TVPSS_Version for the retrieved schoolID
+            try (PreparedStatement updateSchoolVersionStmt = conn.prepareStatement(updateSchoolVersionQuery)) {
+                updateSchoolVersionStmt.setInt(1, schoolID);
+                int rowsAffected = updateSchoolVersionStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    conn.rollback();
+                    return false; // No rows updated in the school table
+                }
+            }
+
+            // Commit the transaction
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Return false if an exception occurs
+        }
+    }
+
+    
+    public static boolean updateRejectedApplicationTvpssVersion(int id, String rejectReason) throws UnsupportedEncodingException {
+    	  String updateStatusQuery = 
+    		        "UPDATE tvpssversionapplication SET status = 'Rejected', rejectReason = ? WHERE id = ?";
+    		    String getSchoolIDQuery = 
+    		        "SELECT schoolID FROM tvpssversionapplication WHERE id = ?";
+    		    String getTeacherEmailQuery = 
+    		        "SELECT email FROM user WHERE schoolID = ? AND role = 'Teacher'";
+
+    		    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+    		        conn.setAutoCommit(false); // Start transaction
+
+    		        // Step 1: Update the application status and reject reason
+    		        try (PreparedStatement updateStmt = conn.prepareStatement(updateStatusQuery)) {
+    		            updateStmt.setString(1, rejectReason);
+    		            updateStmt.setInt(2, id);
+    		            int rowsAffected = updateStmt.executeUpdate();
+
+    		            if (rowsAffected == 0) {
+    		                conn.rollback();
+    		                return false; // No rows updated
+    		            }
+    		        }
+
+    		        // Step 2: Get the schoolID from tvpssversionapplication
+    		        int schoolID;
+    		        try (PreparedStatement getSchoolStmt = conn.prepareStatement(getSchoolIDQuery)) {
+    		            getSchoolStmt.setInt(1, id);
+    		            ResultSet rs = getSchoolStmt.executeQuery();
+    		            if (rs.next()) {
+    		                schoolID = rs.getInt("schoolID");
+    		            } else {
+    		                conn.rollback();
+    		                return false; // No schoolID found
+    		            }
+    		        }
+
+    		        // Step 3: Get the email of the teacher from the user table
+    		        String teacherEmail = null;
+    		        try (PreparedStatement getEmailStmt = conn.prepareStatement(getTeacherEmailQuery)) {
+    		            getEmailStmt.setInt(1, schoolID);
+    		            ResultSet rs = getEmailStmt.executeQuery();
+    		            if (rs.next()) {
+    		                teacherEmail = rs.getString("email");
+    		            } else {
+    		                conn.rollback();
+    		                return false; // No teacher email found
+    		            }
+    		        }
+
+    		        // Step 4: Commit the transaction
+    		        conn.commit();
+
+    		        // Step 5: Send the rejection email
+    		        if (teacherEmail != null) {
+    		            EmailService.sendRejectionEmail(teacherEmail, rejectReason);
+    		        }
+    		        return true;
+
+    		    } catch (SQLException e) {
+    		        e.printStackTrace();
+    		        return false; // Return false if an exception occurs
+    		    }
+    }
 
 
 

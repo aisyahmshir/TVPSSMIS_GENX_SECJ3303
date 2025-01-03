@@ -1,5 +1,6 @@
 package com.tvpss.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import com.tvpss.model.School;
 import com.tvpss.model.SchoolModel;
 import com.tvpss.model.UserModel;
 import com.tvpss.service.CrewService;
+import com.tvpss.service.EmailService;
 
 @Controller
 public class CrewController {
@@ -223,6 +225,32 @@ public class CrewController {
 
         return "redirect:/teacherViewApplication";
     }
+    
+    
+    
+    @GetMapping("/districtViewApplication")
+    public String districtViewApplication(HttpSession session, Model model) {
+        System.out.println("I'm in");
+
+        // Get the userID from the session
+        //Integer userID = (Integer) session.getAttribute("userID");
+        Integer userID = 1;
+        if (userID == null) {
+            throw new IllegalStateException("User is not logged in.");
+        }
+
+        // Fetch applications using the service
+        List<Map<String, Object>> applications = CrewService.getTVPSSVersionApplication(userID);
+        
+        // Add role and dynamic data to the model
+        model.addAttribute("role", "teacher");
+        model.addAttribute("versionApplications", applications);
+        
+        System.out.println("versionApplications "+applications);
+
+
+        return "crewVersionModule/districtViewApplication";
+    }
 
 	 @GetMapping("/districtMainView")
 	 public String districtMainView(Model model) {
@@ -334,6 +362,50 @@ public class CrewController {
 
 	     return "crewVersionModule/viewMore"; // Return to the view page
 	 }
+	 
+	 @PostMapping("/approveApplication")
+	 public String approveApplication(@RequestParam("id") int id, RedirectAttributes redirectAttributes) {
+	     // Assuming you have a service method to update the application status
+	     boolean isUpdated = CrewService.updateApproveApplicationTvpssVersion(id);
+
+	     // Log the ID and the operation
+	     System.out.println("Application ID: " + id);
+	     System.out.println("Status updated to 'Approved'");
+
+	     // Set a redirect attribute to indicate success or failure
+	     if (isUpdated) {
+	         redirectAttributes.addAttribute("status", "success");
+	     } else {
+	         redirectAttributes.addAttribute("status", "error");
+	     }
+
+	     // Redirect to the applications page or another view after processing
+	     return "redirect:/districtViewApplication";  // Adjust as needed
+	 }
+	 
+	 @PostMapping("/rejectApplication")
+	 public String rejectApplication(@RequestParam("id") int id,
+			 @RequestParam("rejectReason") String rejectReason,
+			 RedirectAttributes redirectAttributes) throws UnsupportedEncodingException {
+	     // Assuming you have a service method to update the application status
+	     boolean isUpdated = CrewService.updateRejectedApplicationTvpssVersion(id,rejectReason);
+	     System.out.println("result is "+ isUpdated);
+	     // Log the ID and the operation
+	     System.out.println("Application ID: " + id);
+	     System.out.println("Status updated to 'Approved'");
+
+	     // Set a redirect attribute to indicate success or failure
+	     if (isUpdated) {
+	    	 
+	         redirectAttributes.addAttribute("status", "success");
+	     } else {
+	         redirectAttributes.addAttribute("status", "error");
+	     }
+
+	     // Redirect to the applications page or another view after processing
+	     return "redirect:/districtViewApplication";  // Adjust as needed
+	 }
+
 
 
 }
