@@ -98,17 +98,17 @@
 							<div class="summary-cards grid grid-cols-1 gap-4 place-items-center h-full">
 							    <!-- Total School Card -->
 							    <div class="card total-school bg-blue-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
-							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">120</div>
-							        <span class="text-sm font-medium text-center mt-2">Total School</span>
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold" th:text="${stateTotalSchool}"></div>
+							        <span class="text-sm font-medium text-center mt-2">Total Schools</span>
 							    </div>
 							    <!-- Total Districts Card -->
 							    <div class="card total-districts bg-green-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
-							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">45</div>
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold" th:text="${stateTotalDistrict}"></div>
 							        <span class="text-sm font-medium text-center mt-2">Total Districts</span>
 							    </div>
 							    <!-- Total Content This Month Card -->
 							    <div class="card total-content bg-orange-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
-							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">35</div>
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold" th:text="${totalContentCurMonth}"></div>
 							        <span class="text-sm font-medium text-center mt-2">Total Content (This Month)</span>
 							    </div>
 							</div>
@@ -120,7 +120,7 @@
                     <div class="col-span-9">
                         <!-- First Row: Total Equipment with Bar Chart -->
                         <div class="equipment-card bg-white p-6 rounded-lg shadow-md mb-6">
-                            <h2 class="text-xl font-semibold mb-4">Total Equipment (District)</h2>
+                            <h2 class="text-xl font-semibold mb-4">TVPSS Version status</h2>
                             <div class="bar-chart-container h-52 w-65" style="width:'400px'">
                                 <!-- Bar Chart -->
                                 <canvas id="barChart"></canvas>
@@ -131,7 +131,7 @@
                         <div class="grid grid-cols-2 gap-6">
                             <!-- TVPSS Level Status with Pie Chart -->
 						<div class="tpss-level-status-card bg-white p-6 rounded-lg shadow-md">
-						    <h2 class="text-xl font-semibold mb-4">TVPSS Level Status</h2>
+						    <h2 class="text-xl font-semibold mb-4">Studio Level Status</h2>
 						    <div class="pie-chart-container h-72 w-full flex items-center justify-center">
 						        <!-- Pie Chart -->
 						        <canvas id="pieChart"></canvas>
@@ -202,10 +202,10 @@
             data: {
                 labels: barLabels,
                 datasets: [{
-                    label: 'Total Equipment',
+                    label: 'TVPSS version',
                     data: barData, // Fixed data
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: ['#92eb34', '#FFCD56', '#0370ff', '#FF6384'],
+                    borderColor: ['#92eb34', '#FFCD56', '#0370ff', '#FF6384'],
                     borderWidth: 1
                 }]
             },
@@ -215,6 +215,16 @@
                 scales: {
                     y: {
                         beginAtZero: true
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'middle',
+                    align: 'center', // Ensures the legend is aligned to the center of the chart
+                    labels: {
+                        boxWidth: 20, // Adjust the box size if necessary
+                        padding: 10 // Add some padding around the labels
                     }
                 }
             }

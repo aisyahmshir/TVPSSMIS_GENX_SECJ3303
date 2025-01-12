@@ -3,6 +3,7 @@ package com.tvpss.model;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import javax.servlet.http.HttpSession;
 
 public class UserModel {
 	private int id;
@@ -48,6 +49,9 @@ public class UserModel {
         this.session = rs.getString("session");
         this.districtID = rs.getInt("districtID");
         this.schoolID = rs.getInt("schoolID");
+    }
+    
+    public UserModel() {
     }
     
     
@@ -156,5 +160,6 @@ public class UserModel {
 	public void setSchoolID(int schoolID) {
 		this.schoolID = schoolID;
 	}
+
 }
 

@@ -1,21 +1,37 @@
 package com.tvpss.model;
 
-import java.util.List;
-
 public class ContentModel {
-    private String title;
-    private String dateCreated;
-    private String youtubeUrl;
-    private String eventName;
-    private String details;
+    private int contentID;        // Primary key, auto-increment
+    private String title;         // VARCHAR(65)
+    private String date;          // DATE
+    private String eventName;     // VARCHAR(115)
+    private String details;       // VARCHAR(250)
+    private String createdAt;     // TIMESTAMP (default to current_timestamp())
+    private String videoURL;      // VARCHAR(250)
+    private int schoolID;         // Foreign key, index to school table
 
     // Constructor, getters, and setters
-    public ContentModel(String title, String dateCreated, String youtubeUrl, String eventName, String details) {
+    public ContentModel(int contentID, String title, String date, String eventName, String details, String createdAt, String videoURL, int schoolID) {
+        this.contentID = contentID;
         this.title = title;
-        this.dateCreated = dateCreated;
-        this.youtubeUrl = youtubeUrl;
+        this.date = date;
         this.eventName = eventName;
         this.details = details;
+        this.createdAt = createdAt;
+        this.videoURL = videoURL;
+        this.schoolID = schoolID;
+    }
+
+    public ContentModel() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public int getContentID() {
+        return contentID;
+    }
+
+    public void setContentID(int contentID) {
+        this.contentID = contentID;
     }
 
     public String getTitle() {
@@ -26,22 +42,14 @@ public class ContentModel {
         this.title = title;
     }
 
-    public String getDateCreated() {
-        return dateCreated;
+    public String getDate() {
+        return date;
     }
 
-    public void setDateCreated(String dateCreated) {
-        this.dateCreated = dateCreated;
+    public void setDate(String date) {
+        this.date = date;
     }
 
-    public String getYoutubeUrl() {
-        return youtubeUrl;
-    }
-
-    public void setYoutubeUrl(String youtubeUrl) {
-        this.youtubeUrl = youtubeUrl;
-    }
-    
     public String getEventName() {
         return eventName;
     }
@@ -58,6 +66,27 @@ public class ContentModel {
         this.details = details;
     }
 
-    
-}
+    public String getCreatedAt() {
+        return createdAt;
+    }
 
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getVideoURL() {
+        return videoURL;
+    }
+
+    public void setVideoURL(String videoURL) {
+        this.videoURL = videoURL;
+    }
+
+    public int getSchoolID() {
+        return schoolID;
+    }
+
+    public void setSchoolID(int schoolID) {
+        this.schoolID = schoolID;
+    }
+}

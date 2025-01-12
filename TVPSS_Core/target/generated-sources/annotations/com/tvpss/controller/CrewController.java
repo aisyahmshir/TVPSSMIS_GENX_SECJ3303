@@ -1,5 +1,6 @@
 package com.tvpss.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import com.tvpss.model.School;
 import com.tvpss.model.SchoolModel;
 import com.tvpss.model.UserModel;
 import com.tvpss.service.CrewService;
+import com.tvpss.service.EmailService;
 
 @Controller
 public class CrewController {
@@ -117,7 +119,7 @@ public class CrewController {
             schoolData.put("address", schoolInfo.getFullAddress());
             schoolData.put("version", schoolInfo.getTvpssVersion());
             schoolData.put("url", schoolInfo.getVersionImageURL());
-            Boolean checkSubmission = CrewService.checkPendingApplication(schoolInfo.getSchoolID().intValue());
+            Boolean checkSubmission = CrewService.checkPendingApplication(schoolInfo.getSchoolID());
 
             // Get associated crew members with names
             List<Map<String, Object>> crewsWithNames = CrewService.getCrewsWithNamesBySchoolId(schoolInfo.getSchoolID());
@@ -135,7 +137,7 @@ public class CrewController {
             schoolData.put("checkStatus", checkSubmission);
             schools.add(schoolData);
             System.out.println("school Data "+ checkSubmission);
-        model.addAttribute("schools", schools);
+            model.addAttribute("schools", schools);
 
         return "crewVersionModule/teacherMainView";
     }
@@ -200,9 +202,9 @@ public class CrewController {
     
     // Bulk approve/reject students
     @PostMapping("/approveRejectStudents")
-    public String bulkApproveRejectStudents(@RequestParam("studentIds") List<Long> studentIds,
+    public String bulkApproveRejectStudents(@RequestParam("studentIds") List<Integer> studentIds,
                                             @RequestParam("action") String action, Model model) {
-        // Print the received parameters
+        // Print the received parameters 
         System.out.println("Received studentIds: " + studentIds);
         System.out.println("Received action: " + action);
         if (studentIds == null || studentIds.isEmpty()) {
@@ -223,128 +225,187 @@ public class CrewController {
 
         return "redirect:/teacherViewApplication";
     }
+    
+    
+    
+    @GetMapping("/districtViewApplication")
+    public String districtViewApplication(HttpSession session, Model model) {
+        System.out.println("I'm in");
 
-	
+        // Get the userID from the session
+        //Integer userID = (Integer) session.getAttribute("userID");
+        Integer userID = 1;
+        if (userID == null) {
+            throw new IllegalStateException("User is not logged in.");
+        }
+
+        // Fetch applications using the service
+        List<Map<String, Object>> applications = CrewService.getTVPSSVersionApplication(userID);
+        
+        // Add role and dynamic data to the model
+        model.addAttribute("role", "teacher");
+        model.addAttribute("versionApplications", applications);
+        
+        System.out.println("versionApplications "+applications);
+
+
+        return "crewVersionModule/districtViewApplication";
+    }
+
 	 @GetMapping("/districtMainView")
-	    public String districtMainView(Model model) {
-	        System.out.println("I'm in");
-
-	        // Add dynamic data for school list
-	        List<Map<String, Object>> schools = new ArrayList<>();
-
-	        // Data for 5 schools
-	        for (int i = 1; i <= 5; i++) {
-	            Map<String, Object> school = new HashMap<>();
-	            school.put("name", "School " + i);
-	            school.put("address", "Address " + i);
-	            school.put("version", "Version " + i);
-
-	            // Crew list for each school
-	            List<String> crewList = new ArrayList<>();
-	            crewList.add("Teacher A");
-	            crewList.add("Teacher B");
-	            crewList.add("Teacher C");
-
-	            // Add crew list to school data
-	            school.put("crew", crewList);
-
-	            // Single image URL for each school
-	            String image = "https://via.placeholder.com/"+"School " + i; // Example URL for image
-	            school.put("image", image); // Use single URL instead of a list
-
-	            // Add the school to the list
-	            schools.add(school);
+	 public String districtMainView(Model model) {
+		    // Step 1: Call the service to get schools and users
+	        //Integer userID = (Integer) session.getAttribute("userID");
+	        Integer userID = 1;
+	        if (userID == null) {
+	            throw new IllegalStateException("User is not logged in.");
 	        }
+	        Integer districtID = CrewService.getDistrictIdByUserId(userID);
+	        System.out.println("District ID: " + districtID);
+	        
+		    Map<String, Object> result = CrewService.getSchoolsAndUsersByDistrict(districtID);
 
-	        // Add the list of schools to the model
-	        model.addAttribute("schools", schools);
+		    // Step 2: Extract the list of schools and users from the result
+		    List<School> schools = (List<School>) result.get("schools");
+		    List<UserModel> users = (List<UserModel>) result.get("users");
 
-	        return "crewVersionModule/districtMainView"; // Path to the HTML template
-	    }
+		    // Step 3: Extract the districtIDs from the schools
+		    List<Integer> districtIDs = new ArrayList<>();
+		    for (School school : schools) {
+		    	System.out.println("districtID "+ school.getDistrictID());
+		        districtIDs.add(school.getDistrictID());
+		    }
+
+		    // Step 4: Get district names based on districtIDs by calling the CrewService method
+		    List<String> districtNames = CrewService.getCrewNamesByDistrictIDs(districtIDs);
+
+		    // Step 5: Create a Map for easy lookup of Users by schoolID
+		    Map<Integer, UserModel> userMap = new HashMap<>();
+		    for (UserModel user : users) {
+		    	System.out.println("user "+user.getName());
+		        userMap.put((int) user.getSchoolID(), user);  // Map schoolID to the corresponding user
+		    }
+
+		    // Step 6: Add the user information to each school in the model (if needed)
+		    model.addAttribute("schools", schools);  // Schools list
+		    model.addAttribute("district", districtNames);  // District names list
+		    model.addAttribute("userMap", userMap);  // User map to be accessed in the view
+
+		    // Step 7: Return the view name to render
+		    return "crewVersionModule/districtMainView";  // Path to the HTML template
+		}
 	 
+	 
+	 //STATE'S CONTROLLER METHODS
 	 @GetMapping("/stateMainView")
-	 public String stateMainView(Model model) {
-	     System.out.println("I'm in");
+	 public String getSchoolsAndDistrictDetails(Model model) {
+		    // Step 1: Call the service to get schools and users
+		    Map<String, Object> result = CrewService.getSchoolsAndUsers();
 
-	     // List to store school data for the district
-	     List<Map<String, Object>> schools = new ArrayList<>();
-	     List<String> districts = new ArrayList<>();
+		    // Step 2: Extract the list of schools and users from the result
+		    List<School> schools = (List<School>) result.get("schools");
+		    List<UserModel> users = (List<UserModel>) result.get("users");
 
-	     // Sample data for 5 schools
-	     for (int i = 1; i <= 5; i++) {
-	         Map<String, Object> school = new HashMap<>();
-	         school.put("id", i); // Add an ID for each school
-	         school.put("name", "School " + i);
-	         school.put("address", "District " + i);
-	         school.put("version", "Version " + i);
-		     districts.add("District "+i);
+		    // Step 3: Extract the districtIDs from the schools
+		    List<Integer> districtIDs = new ArrayList<>();
+		    for (School school : schools) {
+		    	System.out.println("districtID "+ school.getDistrictID());
+		        districtIDs.add(school.getDistrictID());
+		    }
 
-	         // Sample crew list for each school
-	         List<String> crewList = new ArrayList<>();
-	         crewList.add("Teacher A");
-	         crewList.add("Teacher B");
-	         crewList.add("Teacher C");
+		    // Step 4: Get district names based on districtIDs by calling the CrewService method
+		    List<String> districtNames = CrewService.getCrewNamesByDistrictIDs(districtIDs);
 
-	         // Add crew list to school data
-	         school.put("crew", crewList);
+		    // Step 5: Create a Map for easy lookup of Users by schoolID
+		    Map<Integer, UserModel> userMap = new HashMap<>();
+		    for (UserModel user : users) {
+		    	System.out.println("user "+user.getName());
+		        userMap.put((int) user.getSchoolID(), user);  // Map schoolID to the corresponding user
+		    }
 
-	         // Sample image URL for each school
-	         String image = "https://via.placeholder.com/150?text=School+" + i;
-	         school.put("image", image);
+		    // Step 6: Add the user information to each school in the model (if needed)
+		    model.addAttribute("schools", schools);  // Schools list
+		    model.addAttribute("district", districtNames);  // District names list
+		    model.addAttribute("userMap", userMap);  // User map to be accessed in the view
 
-	         // Add the school to the list
-	         schools.add(school);
-	     }
+		    // Step 7: Return the view name to render
+		    return "crewVersionModule/stateMainView";  // Path to the HTML template
+		}
 
-	     // Add the schools data to the model for rendering
-	     model.addAttribute("schools", schools);
-
-	     // Add the districts to the model for the dropdown filter
-	     model.addAttribute("districts", districts);
-
-	     return "crewVersionModule/stateMainView"; // Path to the HTML template
-	 }
 	 
 	 @GetMapping("/viewCrewSchool/{id}")
-	 public String viewSchool(@PathVariable("id") int schoolId, Model model) {
+	 public String viewSchool(@PathVariable("id") int schoolId,
+			 HttpSession session,
+			 Model model) {
 	     System.out.println("View school with ID: " + schoolId);
+		 String viewPath = "";
+		 //String role = (String) session.getAttribute("role");
+		 String role = "District";
+		 if ("District".equalsIgnoreCase(role)) {
+		        viewPath = "/districtMainView";
+		        System.out.println("view is "+ viewPath);
+		    } else if ("State".equalsIgnoreCase(role)) {
+		        viewPath = "/stateMainView";
+		    } 
+	     // Fetch school data using the service method
+	     Map<String, Object> schoolData = CrewService.getTVPSSCrewVersionInfo(schoolId);
 
-	     // Find the school by ID (this would normally come from a database)
-	     Map<String, Object> selectedSchool = null;
-
-	     for (int i = 1; i <= 5; i++) {
-	         if (i == schoolId) {
-	             selectedSchool = new HashMap<>();
-	             selectedSchool.put("id", i);
-	             selectedSchool.put("name", "School " + i);
-	             selectedSchool.put("address", "Address " + i);
-	             selectedSchool.put("version", "Version " + i);
-
-	             // Crew list for the specific school
-	             List<String> crewList = new ArrayList<>();
-	             crewList.add("Teacher A");
-	             crewList.add("Teacher B");
-	             crewList.add("Teacher C");
-
-	             // Add crew list to school data
-	             selectedSchool.put("crew", crewList);
-
-	             // Image URL for the specific school
-	             String image = "https://via.placeholder.com/" + "School " + i;
-	             selectedSchool.put("image", image); // Use single URL instead of a list
-	             break; // Break after finding the school
-	         }
+	     if (schoolData == null || schoolData.isEmpty()) {
+	         model.addAttribute("error", "School not found");
+	         return "crewVersionModule/stateViewMore";
 	     }
+	     System.out.println("school data "+ schoolData);
 
-	     System.out.println(selectedSchool);
+	     // Add school data to the model
+	     model.addAttribute("school", schoolData);
+	     model.addAttribute("viewPath", viewPath);
 
-	     if (selectedSchool != null) {
-	         model.addAttribute("school", selectedSchool); // Add the selected school to the model
-	     } else {
-	         model.addAttribute("error", "School not found"); // If no school found
-	     }
-
-	     return "crewVersionModule/stateViewMore"; // Return to the school details page
+	     return "crewVersionModule/viewMore"; // Return to the view page
 	 }
+	 
+	 @PostMapping("/approveApplication")
+	 public String approveApplication(@RequestParam("id") int id, RedirectAttributes redirectAttributes) {
+	     // Assuming you have a service method to update the application status
+	     boolean isUpdated = CrewService.updateApproveApplicationTvpssVersion(id);
+
+	     // Log the ID and the operation
+	     System.out.println("Application ID: " + id);
+	     System.out.println("Status updated to 'Approved'");
+
+	     // Set a redirect attribute to indicate success or failure
+	     if (isUpdated) {
+	         redirectAttributes.addAttribute("status", "success");
+	     } else {
+	         redirectAttributes.addAttribute("status", "error");
+	     }
+
+	     // Redirect to the applications page or another view after processing
+	     return "redirect:/districtViewApplication";  // Adjust as needed
+	 }
+	 
+	 @PostMapping("/rejectApplication")
+	 public String rejectApplication(@RequestParam("id") int id,
+			 @RequestParam("rejectReason") String rejectReason,
+			 RedirectAttributes redirectAttributes) throws UnsupportedEncodingException {
+	     // Assuming you have a service method to update the application status
+	     boolean isUpdated = CrewService.updateRejectedApplicationTvpssVersion(id,rejectReason);
+	     System.out.println("result is "+ isUpdated);
+	     // Log the ID and the operation
+	     System.out.println("Application ID: " + id);
+	     System.out.println("Status updated to 'Approved'");
+
+	     // Set a redirect attribute to indicate success or failure
+	     if (isUpdated) {
+	    	 
+	         redirectAttributes.addAttribute("status", "success");
+	     } else {
+	         redirectAttributes.addAttribute("status", "error");
+	     }
+
+	     // Redirect to the applications page or another view after processing
+	     return "redirect:/districtViewApplication";  // Adjust as needed
+	 }
+
+
 
 }

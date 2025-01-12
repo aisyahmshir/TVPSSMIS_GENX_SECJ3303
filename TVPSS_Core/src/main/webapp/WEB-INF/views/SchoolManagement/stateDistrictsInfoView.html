@@ -121,41 +121,32 @@ width:100% !important;
             <main class="flex-1 p-4 overflow-auto">
                 <h1 class="text-3xl font-bold text-left">View School Information</h1>
                 <hr class="my-4 border-t-2 border-gray-800">
-                
-                <div class="mb-4">
-			        <label for="districtSelect">Select District</label>
-			        <select id="districtSelect" class="form-control">
-			            <option value="">All Districts</option>
-			            <!-- Loop through the districts list to populate the dropdown -->
-			            <option th:each="district : ${districts}" th:value="${district.districtName}" th:text="${district.districtName}"></option>
-			        </select>
-			    </div>
 			    
                 <!-- DataTable -->
                 <table id="resultTable" class="display" style="width:100%">
-                    <thead>
-		                <tr>
-		                    <th>District</th>
-		                    <th>Person-In-Charge</th>
-		                    <th>Total Schools</th>
-		                    <th>Action</th>
-		                </tr>
-		            </thead>
-		            <tbody>
-		                <!-- Use Thymeleaf to iterate through districts -->
-		                <tr th:each="district : ${districts}">
-		                    <td th:text="${district.districtName}"></td>
-		                    <td th:text="${district.personInCharge}"></td>
-		                    <td th:text="${district.totalSchools}"></td>
-		                    <td>
-                                <a class="btn btn-primary viewMoreBtn" 
-								   th:href="@{/stateSchoolsView/{id}(id=${district.dID})}">
-								  	Select
-								</a>
-                            </td>
-		                </tr>
-		            </tbody>
-                </table>
+			    <thead>
+			        <tr>
+			            <th>District</th>
+			            <th>Person-In-Charge</th>
+			            <th>Total Schools</th>
+			            <th>Action</th>
+			        </tr>
+			    </thead>
+			    <tbody>
+			        <!-- Use Thymeleaf to iterate through districts -->
+			        <tr th:each="district : ${districts}">
+			            <td th:text="${district.districtName}"></td>
+			            <td th:text="${district.personInCharge}"></td>
+			            <td th:text="${district.totalSchools}"></td>
+			            <td>
+			                <a class="btn btn-primary viewMoreBtn" 
+			                   th:href="@{/districtSchoolsView/{id}(id=${district.districtID})}">
+			                    Select
+			                </a>
+			            </td>
+			        </tr>
+			    </tbody>
+			</table>
 			</main>
 			<footer class="bg-blue-900 text-white text-center py-4">
           	<p>Ministry of Education | TVPSS Application Portal</p>

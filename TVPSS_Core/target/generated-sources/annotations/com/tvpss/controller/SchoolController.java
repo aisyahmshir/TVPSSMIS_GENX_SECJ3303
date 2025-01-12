@@ -1,580 +1,494 @@
 package com.tvpss.controller;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
+import javax.sql.rowset.serial.SerialBlob;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.mysql.cj.jdbc.Blob;
 import com.tvpss.model.CrewModel;
+import com.tvpss.model.School;
+import com.tvpss.model.SchoolModel;
+import com.tvpss.model.UserModel;
+import com.tvpss.service.CrewService;
+import com.tvpss.service.EmailService;
+import com.tvpss.service.SchoolService;
 
 @Controller
-public class SchoolController {
+public class SchoolController{
+    private School school;
+
+	// Display the Add School Form
 	
-	private List<String> schools = new ArrayList<>();
+	@GetMapping("/addSchool")
+    public String showAddSchoolForm(Model model) {
+        model.addAttribute("allDistricts", SchoolService.getAllDistricts()); // Fetch districts for dropdown
+        return "SchoolManagement/addSchoolForm"; // Return the name of the HTML template
+    }
 
-    // Display the Add School Form
-	@GetMapping("/addSchool/{id}")
-	public String addSchoolForm(@PathVariable int id, Model model) {
-	    // Fetch the school data based on the ID
-	    Map<String, Object> schoolDetail = getSchoolById(id); // Replace with actual data fetching logic
+	@PostMapping("/addSchool")
+	public String addSchool(@RequestParam("name") String name, 
+	                        @RequestParam("fullAddress") String fullAddress, 
+	                        @RequestParam("state") String state, 
+	                        @RequestParam("districtID") String districtIDStr, 
+	                        @RequestParam("contactNo") String contactNo,
+	                        @RequestParam("versionImageURL") String versionImageURL) {
+		int districtID = Integer.parseInt(districtIDStr);
+		
+		School school = new School(name, fullAddress, state, districtID, contactNo, versionImageURL);
 
-	    // Add school data to the model
-	    model.addAttribute("schoolDetail", schoolDetail);
-	    return "SchoolManagement/addSchoolForm";
+	    school.setName(name);
+	    school.setFullAddress(fullAddress);
+	    school.setState(state);
+	    school.setContactNo(contactNo);
+	    school.setVersionImageURL(versionImageURL);
+	    
+	    // Handle districtID conversion
+	    if (districtIDStr != null && !districtIDStr.isEmpty()) {
+	        try {
+	            districtID = Integer.parseInt(districtIDStr);
+	            school.setDistrictID(districtID);
+	        } catch (NumberFormatException e) {
+	            e.printStackTrace(); // Handle invalid district ID
+	            return "redirect:/error"; // Redirect to error page
+	        }
+	    } else {
+	        return "redirect:/error"; // Redirect to error page if districtID is missing
+	    }
+
+	    // Add the school to the database and retrieve the school object with ID
+	    School addedSchool = SchoolService.addSchool(school);
+	    if (addedSchool != null) {
+	        return "redirect:/teacherSchoolView/" + addedSchool.getSchoolID(); // Redirect to success page
+	    } else {
+	        return "redirect:/error"; // Redirect to error page if adding failed
+	    }
 	}
-
-
-	@GetMapping("/districtSchoolsView")
-	public String districtSchool(Model model) {
-	    System.out.println("I'm in");
-
-        // Add dynamic data for school list
-        List<Map<String, Object>> schoolsList = new ArrayList<>();
-
-     // School 1
-        Map<String, Object> school1 = new HashMap<>();
-        school1.put("id", 1);
-        school1.put("schoolName", "SK Pagoh");
-        school1.put("teacherInCharge", "Ms. Syafidah");
-        school1.put("schoolPhone", "07-5562577");
-        school1.put("schoolAddress", "Sekolah Kebangsaan Pagoh, KM 33, Pekan Pagoh, 84600 Pagoh, Johor");
-        school1.put("postcode", 84600);
-        school1.put("district", "Pagoh");
-        school1.put("tvpssVersion", "2");
-        school1.put("studioLevel", "2");
-        school1.put("schoolLogo", "path/to/logo.png");
-        schoolsList.add(school1);
-        
-        // School 2
-        Map<String, Object> school2 = new HashMap<>();
-        school2.put("id", 2);
-        school2.put("schoolName", "SK Batu Pahat");
-        school2.put("teacherInCharge", "Ms. Afiqah");
-        school2.put("schoolPhone", "07-5562577");
-        school2.put("schoolAddress", "Sekolah Kebangsaan Batu Pahat, KM4, 83000 Batu Pahat, Johor ");
-        school2.put("postcode", 83000);
-        school2.put("district", "Batu Pahat");
-        school2.put("tvpssVersion", "3");
-        school2.put("studioLevel", "2");
-        school2.put("schoolLogo", "path/to/logo.png");
-        schoolsList.add(school2);
-
-        // Add the list of schools to the model
-        model.addAttribute("schoolsList", schoolsList);
-
-        return "SchoolManagement/districtSchoolsView";
+	
+	@GetMapping("/editSchool/{schoolId}")
+	public String showEditSchoolForm(@PathVariable int schoolId, Model model) {
+	    // Fetch the school details using the schoolId
+	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
+	    
+	    // Check if the school details were found
+	    if (schoolDetail != null) {
+	        model.addAttribute("schoolDetail", schoolDetail);
+	        // Fetch all districts for the dropdown if needed
+	        Map<Integer, String> allDistricts = SchoolService.getAllDistricts();
+	        model.addAttribute("allDistricts", allDistricts);
+	        return "SchoolManagement/editSchoolInfo";
+	    } else {
+	        model.addAttribute("errorMessage", "School not found.");
+	        return "redirect:/error"; // Redirect to error page if school not found
+	    }
 	}
+	
+	@PostMapping("/editSchool/{schoolId}")
+	public String editSchool(
+	        @RequestParam("name") String name, 
+	        @RequestParam("fullAddress") String fullAddress, 
+	        @RequestParam("state") String state, 
+	        @RequestParam("districtID") String districtIDStr, 
+	        @RequestParam("contactNo") String contactNo,
+	        @RequestParam("versionImageURL") String versionImageURL,
+	        RedirectAttributes redirectAttributes, 
+	        @PathVariable int schoolId) {
+	    
+	    System.out.println("Editing school: " + name); // Log the school object
+
+	    // Create a new School object and set its properties
+	    School school = new School();
+	    school.setSchoolID(schoolId); // Set the schoolID from the path variable
+	    school.setName(name);
+	    school.setFullAddress(fullAddress);
+	    school.setState(state);
+	    
+	    // Handle districtID conversion
+	    if (districtIDStr != null && !districtIDStr.isEmpty()) {
+	        try {
+	            int districtID = Integer.parseInt(districtIDStr);
+	            school.setDistrictID(districtID);
+	        } catch (NumberFormatException e) {
+	            e.printStackTrace(); // Handle invalid district ID
+	            redirectAttributes.addFlashAttribute("errorMessage", "Invalid district ID.");
+	            return "redirect:/teacherSchoolView/" + schoolId; // Redirect back to the view
+	        }
+	    } else {
+	        redirectAttributes.addFlashAttribute("errorMessage", "District ID is required.");
+	        return "redirect:/teacherSchoolView/" + schoolId; // Redirect back to the view
+	    }
+
+	    school.setContactNo(contactNo);
+	    school.setVersionImageURL(versionImageURL);
+
+	    // Call the service method to update the school
+	    boolean isUpdated = SchoolService.editSchool(school);
+	    if (isUpdated) {
+	        redirectAttributes.addFlashAttribute("message", "School updated successfully!");
+	        return "redirect:/teacherSchoolView/" + schoolId; // Redirect to success page
+	    } else {
+	        redirectAttributes.addFlashAttribute("errorMessage", "Failed to update school.");
+	        return "redirect:/teacherSchoolView/" + schoolId; // Redirect back to the edit form
+	    }
+	}
+	
+	@GetMapping("/teacherSchoolView/{schoolId}")
+	public String manageSchoolInfo(@PathVariable int schoolId, Model model) {
+	    System.out.println("Fetching details for school ID: " + schoolId);
+
+	    // Fetch the school details using the schoolId
+	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
+	    
+	    // Check if the school details were found
+	    if (schoolDetail != null) {
+	        model.addAttribute("schoolDetail", schoolDetail);
+
+	        // Fetch all districts
+	        Map<Integer, String> allDistricts = SchoolService.getAllDistricts();
+	        model.addAttribute("allDistricts", allDistricts);
+	        
+	        // Get the district name based on the districtID of the school
+	        String districtName = allDistricts.get(schoolDetail.getDistrictID());
+	        model.addAttribute("districtName", districtName);
+	        
+	        UserModel teacher = SchoolService.getTeacherBySchoolId(schoolId);
+	        if (teacher != null) {
+	            model.addAttribute("teacherName", teacher.getName());
+	        } else {
+	            model.addAttribute("teacherName", "Not Assigned");
+	        }
+	        
+	        // Fetch all studios
+	        Map<Integer, Integer> allStudios = SchoolService.getAllStudios();
+	        model.addAttribute("allStudios", allStudios);
+	        
+	        // Get the studio level based on the studioID of the school
+	            Integer studioLevel = allStudios.get(schoolDetail.getStudioID());
+	            model.addAttribute("studioLevel", studioLevel != null ? studioLevel : 0);
+
+	    } else {
+	        model.addAttribute("errorMessage", "School not found.");
+	    }
+
+	    return "SchoolManagement/teacherSchoolView"; // Return the view name
+	}
+	
+	@GetMapping("/districtSchoolsView/{districtId}")
+	public String districtViewSchools(@PathVariable("districtId") int districtId, Model model, HttpSession session) {
+		
+	    session.setAttribute("currentDistrictId", districtId);
+	    // Fetch schools for the given district ID
+	    Map<String, Object> result = SchoolService.getSchoolsByDistrictId(districtId);
+	    
+	    // Extract the list of schools from the result map
+	    List<School> schoolsList = (List<School>) result.get("schools");
+	    
+	 // Fetch all districts and studios once
+	    Map<Integer, String> allDistricts = SchoolService.getAllDistricts();
+	    Map<Integer, Integer> allStudios = SchoolService.getAllStudios();
+	    
+	    // Prepare lists to hold district names and studio levels
+	    List<String> districtNames = new ArrayList<>();
+	    List<Integer> studioLevels = new ArrayList<>();
+	    List<String> teacherNames = new ArrayList<>();
+
+	    List<Integer> schoolIds = schoolsList.stream()
+                .map(School::getSchoolID)
+                .collect(Collectors.toList());
+	    
+	    // Iterate through the schools to get district names and studio levels
+	    for (School school : schoolsList) {
+	        // Get the district name based on the districtID of the school
+	        String districtName = allDistricts.get(school.getDistrictID());
+	        districtNames.add(districtName != null ? districtName : "Unknown District");
+
+	        // Get the studio level based on the studioID of the school
+	        Integer studioLevel = allStudios.get(school.getStudioID());
+	        studioLevels.add(studioLevel != null ? studioLevel : 0); // Default to 0 if not found
+	        
+	        UserModel teacher = SchoolService.getTeacherBySchoolId(school.getSchoolID());
+	        if (teacher != null) {
+	            teacherNames.add(teacher.getName());
+	        } else {
+	            teacherNames.add("Not Assigned");
+	        }
+	    }
+
+	    // Add the lists to the model
+	    model.addAttribute("schoolsList", schoolsList);
+	    model.addAttribute("districtNames", districtNames);
+	    model.addAttribute("studioLevels", studioLevels);
+	    model.addAttribute("teacherNames", teacherNames);
+	    
+	    return "SchoolManagement/districtSchoolsView"; // Return the view name
+	}
+	
+	@GetMapping("/schoolDetail/{schoolId}")
+    public String districtViewSchoolDetail(@PathVariable("schoolId") int schoolId, Model model, HttpSession session) {
+	    System.out.println("Fetching details for school ID: " + schoolId);
+
+	    session.setAttribute("currentSchoolId", schoolId);
+	    // Fetch the school details using the schoolId
+	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
+	    
+	    // Check if the school details were found
+	    if (schoolDetail != null) {
+	        model.addAttribute("schoolDetail", schoolDetail);
+
+	        // Fetch all districts
+	        Map<Integer, String> allDistricts = SchoolService.getAllDistricts();
+	        model.addAttribute("allDistricts", allDistricts);
+	        
+	        // Get the district name based on the districtID of the school
+	        String districtName = allDistricts.get(schoolDetail.getDistrictID());
+	        model.addAttribute("districtName", districtName);
+	        
+	        UserModel teacher = SchoolService.getTeacherBySchoolId(schoolId);
+	        if (teacher != null) {
+	            model.addAttribute("teacherName", teacher.getName());
+	        } else {
+	            model.addAttribute("teacherName", "Not Assigned");
+	        }
+	        
+	        Map<Integer, Integer> allStudios = SchoolService.getAllStudios();
+	        model.addAttribute("allStudios", allStudios);
+	        
+	        // Get the district name based on the districtID of the school
+	        Integer studioLevel = allStudios.get(schoolDetail.getStudioID());
+	        model.addAttribute("studioLevel", studioLevel != null ? studioLevel : 0);
+	    } else {
+	        model.addAttribute("errorMessage", "School not found.");
+	    }
+        return "SchoolManagement/schoolDetailView";
+    }
 	
 	@GetMapping("/stateDistrictsInfo")
     public String viewDistrictsInfo(Model model) {
-		List<Map<String, Object>> districts = new ArrayList<>();
-
-        //District 1
-        Map<String, Object> district1 = new HashMap<>();
-        district1.put("dID", 1);
-        district1.put("districtName", "Batu Pahat");
-        district1.put("personInCharge", "Mr. Zulaifiq");
-        district1.put("totalSchools", "3");
-        districts.add(district1);
-        
-        //District 2
-        Map<String, Object> district2 = new HashMap<>();
-        district2.put("dID", 2);
-        district2.put("districtName", "Pagoh");
-        district2.put("personInCharge", "Ms. Anita");
-        district2.put("totalSchools", "5");
-        districts.add(district2);
-        
-      //District 3
-        Map<String, Object> district3 = new HashMap<>();
-        district3.put("dID", 3);
-        district3.put("districtName", "Kota Tinggi");
-        district3.put("personInCharge", "Mr. Afiq");
-        district3.put("totalSchools", "3");
-        districts.add(district3);
-        
-        // Add the map to the model
+        List<Map<String, Object>> districts = SchoolService.getDistrictsWithDetails();
         model.addAttribute("districts", districts);
 
         return "SchoolManagement/stateDistrictsInfoView"; // The name of the HTML/Thymeleaf template
     }
-	
-	@GetMapping("/stateSchoolsView/{dID}")
-	public String viewDistrictSchools(@PathVariable int dID, Model model) {
-		List<Map<String, Object>> schoolsList = new ArrayList<>();
 
-		// School 1
-        Map<String, Object> school1 = new HashMap<>();
-        school1.put("id", 1);
-        school1.put("schoolName", "SK Pagoh");
-        school1.put("teacherInCharge", "Ms. Syafidah");
-        school1.put("schoolPhone", "07-5562577");
-        school1.put("schoolAddress", "Sekolah Kebangsaan Pagoh, KM 33, Pekan Pagoh, 84600 Pagoh, Johor");
-        school1.put("postcode", 84600);
-        school1.put("district", "Pagoh");
-        school1.put("tvpssVersion", "2");
-        school1.put("studioLevel", "2");
-        school1.put("schoolLogo", "path/to/logo.png");
-        schoolsList.add(school1);
-        
-        // School 2
-        Map<String, Object> school2 = new HashMap<>();
-        school2.put("id", 2);
-        school2.put("schoolName", "SK Batu Pahat");
-        school2.put("teacherInCharge", "Ms. Afiqah");
-        school2.put("schoolPhone", "07-5562577");
-        school2.put("schoolAddress", "Sekolah Kebangsaan Batu Pahat, KM4, 83000 Batu Pahat, Johor ");
-        school2.put("postcode", 83000);
-        school2.put("district", "Batu Pahat");
-        school2.put("tvpssVersion", "3");
-        school2.put("studioLevel", "2");
-        school2.put("schoolLogo", "path/to/logo.png");
-        schoolsList.add(school2);
-
-        // Add the list of schools to the model
-        model.addAttribute("schoolsList", schoolsList);
-
-	    return "SchoolManagement/stateSchoolsView";
-
-	}
-	
-	@GetMapping("/teacherSchoolView/{id}")
-    public String manageSchoolInfo(@PathVariable int id, Model model) {
-        System.out.println("Fetching details for school ID: " + id);
-
-        // Mock data for demonstration (replace with actual data retrieval from database or service)
-        Map<String, Object> schoolDetail = new HashMap<>();
-        schoolDetail.put("id", id);
-        schoolDetail.put("schoolName", "SK Pagoh");
-        schoolDetail.put("teacherInCharge", "Ms. Syafidah");
-        schoolDetail.put("schoolPhone", "07-5562577");
-        schoolDetail.put("schoolAddress", "Sekolah Kebangsaan Pagoh, KM 33, Pekan Pagoh, 84600 Pagoh, Johor");
-        schoolDetail.put("postcode", 84600);
-        schoolDetail.put("district", "Pagoh");
-        schoolDetail.put("tvpssVersion", "2");
-        schoolDetail.put("studioLevel", "2");
-        schoolDetail.put("schoolLogo", "path/to/logo.png"); // Example image path (update as needed)
-
-        // Add school details to the model
-        model.addAttribute("schoolDetail", schoolDetail);
-
-        return "SchoolManagement/teacherSchoolView";
-    }
-	
-	@GetMapping("/districtSchoolDetail/{id}")
-    public String districtViewSchoolDetail(@PathVariable int id, Model model) {
-        System.out.println("Fetching details for school ID: " + id);
-
-        // Mock data for demonstration (replace with actual data retrieval from database or service)
-        Map<String, Object> schoolDetail = new HashMap<>();
-        schoolDetail.put("id", 1);
-        schoolDetail.put("schoolName", "SK Pagoh");
-        schoolDetail.put("teacherInCharge", "Ms. Syafidah");
-        schoolDetail.put("schoolPhone", "07-5562577");
-        schoolDetail.put("schoolAddress", "Sekolah Kebangsaan Pagoh, KM 33, Pekan Pagoh, 84600 Pagoh, Johor");
-        schoolDetail.put("postcode", 84600);
-        schoolDetail.put("district", "Pagoh");
-        schoolDetail.put("tvpssVersion", "2");
-        schoolDetail.put("studioLevel", "2");
-        schoolDetail.put("schoolLogo", "path/to/logo.png");
-
-        // Add school details to the model
-        model.addAttribute("schoolDetail", schoolDetail);
-
-        return "SchoolManagement/districtSchoolDetailView";
-    }
-	
-	@GetMapping("/stateSchoolDetail/{id}")
-    public String stateViewSchoolDetail(@PathVariable int id, Model model) {
-        System.out.println("Fetching details for school ID: " + id);
-
-        // Mock data for demonstration (replace with actual data retrieval from database or service)
-        Map<String, Object> schoolDetail = new HashMap<>();
-        schoolDetail.put("id", 1);
-        schoolDetail.put("schoolName", "SK Pagoh");
-        schoolDetail.put("teacherInCharge", "Ms. Syafidah");
-        schoolDetail.put("schoolPhone", "07-5562577");
-        schoolDetail.put("schoolAddress", "Sekolah Kebangsaan Pagoh, KM 33, Pekan Pagoh, 84600 Pagoh, Johor");
-        schoolDetail.put("postcode", 84600);
-        schoolDetail.put("district", "Pagoh");
-        schoolDetail.put("tvpssVersion", "2");
-        schoolDetail.put("studioLevel", "2");
-        schoolDetail.put("schoolLogo", "path/to/logo.png");
-
-        // Add school details to the model
-        model.addAttribute("schoolDetail", schoolDetail);
-
-        return "SchoolManagement/stateSchoolDetailView";
-    }
-	
-	@GetMapping("/editSchool/{id}")
-	public String editSchool(@PathVariable int id, Model model) {
-	    // Fetch the school data based on the ID
-	    Map<String, Object> schoolDetail = getSchoolById(id); // Replace with actual data fetching logic
-
-	    // Add school data to the model
-	    model.addAttribute("schoolDetail", schoolDetail);
-	    return "SchoolManagement/editSchoolInfo";
-	}
-
-	private Map<String, Object> getSchoolById(int id) {
-	    Map<String, Object> school = new HashMap<>();
-	    school.put("id", 1);
-        school.put("schoolName", "SK Pagoh");
-        school.put("teacherInCharge", "Ms. Syafidah");
-        school.put("schoolPhone", "07-5562577");
-        school.put("schoolAddress", "Sekolah Kebangsaan Pagoh, KM 33, Pekan Pagoh, 84600 Pagoh, Johor");
-        school.put("postcode", 84600);
-        school.put("district", "Pagoh");
-        school.put("tvpssVersion", "2");
-        school.put("studioLevel", "2");
-        school.put("schoolLogo", "path/to/logo.png");
-        school.put("equipmentImages", "https://drive.google.com/your-link-here");
-	    return school;
-	}
-	
 /*EQUIPMENT*/
-    // Display the Add School Form
-    @GetMapping("/addEquipForm/{id}")
-    public String showAddEquipForm(@PathVariable int id, Model model) {
-    	// Mock school details
-    			Map<String, Object> schoolDetail = getSchoolById(id); 
+    @GetMapping("addEquip/{schoolId}")
+    public String showAddEquipmentForm(@PathVariable int schoolId, Model model) {
+        // Fetch the list of equipment from the database
+        List<Map<String, Object>> equipmentList = SchoolService.getAllEquipment();
 
-    		    // Mock equipment list
-    		    List<Map<String, String>> equipmentList = List.of(
-    		        Map.of("name", "TV Program/Show corner", "status", "Yes"),
-    		        Map.of("name", "Editing Corner", "status", "Yes"),
-    		        Map.of("name", "Smartphone", "status", "No"),
-    		        Map.of("name", "External Mic", "status", "Yes"),
-    		        Map.of("name", "Monopod", "status", "No"),
-    		        Map.of("name", "Mobile Green Screen set", "status", "Yes"),
-    		        Map.of("name", "Tripod", "status", "No"),
-    		        Map.of("name", "Wireless Mic", "status", "Yes"),
-    		        Map.of("name", "Mobile Lighting", "status", "Yes"),
-    		        Map.of("name", "Mobile Lighting (3 Point)", "status", "New"),
-    		        Map.of("name", "Camera", "status", "No"),
-    		        Map.of("name", "Editing Software", "status", "Yes"),
-    		        Map.of("name", "Permanent Green Screen", "status", "No"),
-    		        Map.of("name", "Webcam", "status", "No")
-    		    );
+        // Add the equipment list and school ID to the model
+        model.addAttribute("equipmentList", equipmentList);
+        model.addAttribute("schoolDetail", SchoolService.getSchoolDetailsBySchoolID(schoolId)); // Fetch school details if needed
 
-    		    model.addAttribute("schoolDetail", schoolDetail);
-    		    model.addAttribute("equipmentList", equipmentList);
-        return "SchoolManagement/addEquipForm"; // Name of your Thymeleaf template
+        return "SchoolManagement/addEquipForm"; // Return the name of the Thymeleaf template
     }
     
-	@GetMapping("/manageStudioEquipment/{id}")
-	public String manageStudioEquipment(@PathVariable int id, Model model) {
-	    // Mock school details
-	    Map<String, Object> schoolDetail = new HashMap<>();
-	    schoolDetail.put("id", id);
-	    schoolDetail.put("schoolName", "SK Pagoh");
-	    schoolDetail.put("district", "Pagoh");
-	    schoolDetail.put("teacherInCharge", "Pn. Syafidah");
-	    schoolDetail.put("studioLevel", 2);
-	    schoolDetail.put("equipmentImages", "https://drive.google.com/your-link-here"); // Example
+ @PostMapping("manageEquipment/{schoolId}")
+    public String addNewEquipment(@PathVariable int schoolId, 
+                                   @RequestParam Map<String, String> equipmentStatus, 
+                                   @RequestParam String imagesLink, 
+                                   RedirectAttributes redirectAttributes) {
+        SchoolService.addNewEquipment(schoolId, equipmentStatus, imagesLink);
+        redirectAttributes.addFlashAttribute("message", "Equipment availability added successfully!");
+        return "redirect:/manageEquipment/" + schoolId; // Redirect to the manage equipment page
+    }
 
-	    // List of equipment
-	    List<Map<String, String>> equipmentList = new ArrayList<>();
-	    equipmentList.add(Map.of("name", "TV Program/Show Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Editing Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Smartphone", "status", "No"));
-	    equipmentList.add(Map.of("name", "External Mic", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Monopod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Green Screen Set", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Tripod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Wireless Mic", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Webcam", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting (3 Point)", "status", "No"));
-	    equipmentList.add(Map.of("name", "Camera", "status", "No"));
-	    equipmentList.add(Map.of("name", "Editing Software", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Permanent Green Screen", "status", "No"));
-
-	    model.addAttribute("schoolDetail",schoolDetail);
-	    model.addAttribute("equipmentList", equipmentList);
-
-	    return "SchoolManagement/teacherManageEquipPage";
-	}
-
-	@GetMapping("/editEquipment/{id}")
-	public String editEquipment(@PathVariable int id, Model model) {
-	    // Mock school details
-		Map<String, Object> schoolDetail = getSchoolById(id); 
-
-	    // Mock equipment list
-	    List<Map<String, String>> equipmentList = List.of(
-	        Map.of("name", "TV Program/Show corner", "status", "Yes"),
-	        Map.of("name", "Editing Corner", "status", "Yes"),
-	        Map.of("name", "Smartphone", "status", "No"),
-	        Map.of("name", "External Mic", "status", "Yes"),
-	        Map.of("name", "Monopod", "status", "No"),
-	        Map.of("name", "Mobile Green Screen set", "status", "Yes"),
-	        Map.of("name", "Tripod", "status", "No"),
-	        Map.of("name", "Wireless Mic", "status", "Yes"),
-	        Map.of("name", "Mobile Lighting", "status", "Yes"),
-	        Map.of("name", "Mobile Lighting (3 Point)", "status", "New"),
-	        Map.of("name", "Camera", "status", "No"),
-	        Map.of("name", "Editing Software", "status", "Yes"),
-	        Map.of("name", "Permanent Green Screen", "status", "No"),
-	        Map.of("name", "Webcam", "status", "No")
-	    );
-
+	@GetMapping("/editEquipment/{schoolId}")
+	public String editEquipment(@PathVariable int schoolId, Model model) {
+	    // Fetch studio and equipment details
+	    Map<String, Object> studioAndEquipmentDetails = SchoolService.getStudioAndEquipmentDetails(schoolId);
+	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
+	    
+	    Map<Integer, String> allDistricts = SchoolService.getAllDistricts();
+        model.addAttribute("allDistricts", allDistricts);
+        
+        // Get the district name based on the districtID of the school
+        String districtName = allDistricts.get(schoolDetail.getDistrictID());
+        model.addAttribute("districtName", districtName);
+        
+        UserModel teacher = SchoolService.getTeacherBySchoolId(schoolId);
+        if (teacher != null) {
+            model.addAttribute("teacherName", teacher.getName());
+        } else {
+            model.addAttribute("teacherName", "Not Assigned");
+        }
+        
+        Map<Integer, Integer> allStudios = SchoolService.getAllStudios();
+        model.addAttribute("allStudios", allStudios);
+        
+        // Get the district name based on the districtID of the school
+        int studioLevel = allStudios.get(schoolDetail.getStudioID());
+        model.addAttribute("studioLevel", studioLevel);
+	    // Add studio level and equipment list to the model
+	    model.addAttribute("studioLevel", studioAndEquipmentDetails.get("studioLevel"));
+	    model.addAttribute("equipmentList", studioAndEquipmentDetails.get("equipmentList"));
+        model.addAttribute("imagesLink", studioAndEquipmentDetails.get("imagesLink"));
+	    // Fetch school details to display
 	    model.addAttribute("schoolDetail", schoolDetail);
-	    model.addAttribute("equipmentList", equipmentList);
 
 	    return "SchoolManagement/editEquipPage";
 	}
-
-	@GetMapping("/districtManageStudio")
-    public String districtManageStudio(Model model) {
-		List<Map<String, Object>> school = new ArrayList<>();
-
-        //District 1
-        Map<String, Object> school1 = new HashMap<>();
-        school1.put("id", 1);
-        school1.put("schoolName", "SK Pagoh");
-        school1.put("studioLevel", "2");
-        school1.put("tvCorner", "Yes");
-        school1.put("editCorner", "Yes");
-        school1.put("equipments", "6");
-        school.add(school1);
-        
-      //District 1
-        Map<String, Object> school2 = new HashMap<>();
-        school2.put("id", 2);
-        school2.put("schoolName", "SK Pekan Pagoh");
-        school2.put("studioLevel", "2");
-        school2.put("tvCorner", "No");
-        school2.put("editCorner", "Yes");
-        school2.put("equipments", "6");
-        school.add(school2);
-        
-        // Add the map to the model
-        model.addAttribute("school", school);
-
-        return "SchoolManagement/districtManageStudio"; // The name of the HTML/Thymeleaf template
-    }
 	
-	@GetMapping("/districtManageStudioDetail/{id}")
-	public String manageStudioDetail(@PathVariable int id, Model model) {
-	    // Mock school details
-	    Map<String, Object> schoolDetail = new HashMap<>();
-	    schoolDetail.put("id", 1);
-	    schoolDetail.put("schoolName", "SK Pagoh");
-	    schoolDetail.put("district", "Pagoh");
-	    schoolDetail.put("teacherInCharge", "Ms. Syafidah");
-	    schoolDetail.put("studioLevel", 2);
-	    schoolDetail.put("equipmentImages", "https://drive.google.com/your-link-here"); // Example
+	 @PostMapping("/save/{schoolId}")
+	    public String editEquipment(@PathVariable int schoolId, 
+	                                   @RequestParam Map<String, String> equipmentStatus, 
+	                                   @RequestParam(value = "imagesLink", required = false) String imagesLink, 
+	                                   RedirectAttributes redirectAttributes) {
+	        SchoolService.editEquipment(schoolId, equipmentStatus, imagesLink);
+	        redirectAttributes.addFlashAttribute("message", "Equipment availability added successfully!");
+	        return "redirect:/manageEquipment/" + schoolId; // Redirect to the manage equipment page
+	    }
 
-	    // List of equipment
-	    List<Map<String, String>> equipmentList = new ArrayList<>();
-	    equipmentList.add(Map.of("name", "TV Program/Show Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Editing Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Smartphone", "status", "No"));
-	    equipmentList.add(Map.of("name", "External Mic", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Monopod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Green Screen Set", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Tripod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Wireless Mic", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Webcam", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting (3 Point)", "status", "New"));
-	    equipmentList.add(Map.of("name", "Camera", "status", "No"));
-	    equipmentList.add(Map.of("name", "Editing Software", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Permanent Green Screen", "status", "No"));
+	@GetMapping("/manageEquipment/{schoolId}")
+	public String manageEquipment(@PathVariable int schoolId, Model model) {
+	    // Fetch studio and equipment details
+	    Map<String, Object> studioAndEquipmentDetails = SchoolService.getStudioAndEquipmentDetails(schoolId);
+	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
 	    
-	    // Check for "New" status
-	    boolean hasPendingApproval = equipmentList.stream()
-	            .anyMatch(equipment -> "New".equals(equipment.get("status")));
+	    Map<Integer, String> allDistricts = SchoolService.getAllDistricts();
+        model.addAttribute("allDistricts", allDistricts);
+        
+        // Get the district name based on the districtID of the school
+        String districtName = allDistricts.get(schoolDetail.getDistrictID());
+        model.addAttribute("districtName", districtName);
+        
+        UserModel teacher = SchoolService.getTeacherBySchoolId(schoolId);
+        if (teacher != null) {
+            model.addAttribute("teacherName", teacher.getName());
+        } else {
+            model.addAttribute("teacherName", "Not Assigned");
+        }
+        
+        Map<Integer, Integer> allStudios = SchoolService.getAllStudios();
+        model.addAttribute("allStudios", allStudios);
+        
+        // Get the district name based on the districtID of the school
+        int studioLevel = allStudios.get(schoolDetail.getStudioID());
+        model.addAttribute("studioLevel", studioLevel);
+	    // Add studio level and equipment list to the model
+	    model.addAttribute("studioLevel", studioAndEquipmentDetails.get("studioLevel"));
+	    model.addAttribute("equipmentList", studioAndEquipmentDetails.get("equipmentList"));
+        model.addAttribute("imagesLink", studioAndEquipmentDetails.get("imagesLink"));
+	    // Fetch school details to display
+	    model.addAttribute("schoolDetail", schoolDetail);
+	    
+	    String studioLevelStatus = (String) studioAndEquipmentDetails.get("studioLevelStatus");
+	    model.addAttribute("studioLevelStatus", studioLevelStatus);
 
-	    model.addAttribute("schoolDetail",schoolDetail);
-	    model.addAttribute("equipmentList", equipmentList);
-	    model.addAttribute("hasPendingApproval", hasPendingApproval); // Add the flag
-
-	    return "SchoolManagement/districtManageStudioDetail";
+	    return "SchoolManagement/teacherManageEquip"; // Return the view name
 	}
 	
-	@GetMapping("/approved/{id}")
-	public String approvedStudio(@PathVariable int id, Model model) {
-	    // Mock school details
-	    Map<String, Object> schoolDetail = new HashMap<>();
-	    schoolDetail.put("id", 1);
-	    schoolDetail.put("schoolName", "SK Pagoh");
-	    schoolDetail.put("district", "Pagoh");
-	    schoolDetail.put("teacherInCharge", "Ms. Syafidah");
-	    schoolDetail.put("studioLevel", 3);
-	    schoolDetail.put("equipmentImages", "https://drive.google.com/your-link-here"); // Example
-
-	    // List of equipment
-	    List<Map<String, String>> equipmentList = new ArrayList<>();
-	    equipmentList.add(Map.of("name", "TV Program/Show Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Editing Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Smartphone", "status", "No"));
-	    equipmentList.add(Map.of("name", "External Mic", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Monopod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Green Screen Set", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Tripod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Wireless Mic", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Webcam", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting (3 Point)", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Camera", "status", "No"));
-	    equipmentList.add(Map.of("name", "Editing Software", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Permanent Green Screen", "status", "No"));
-
-	    model.addAttribute("schoolDetail",schoolDetail);
-	    model.addAttribute("equipmentList", equipmentList);
-
-	    return "SchoolManagement/districtManageStudioDetail";
+	@GetMapping("/districtSchoolsStudio/{districtId}")
+	public String viewDistrictSchools(@PathVariable int districtId, Model model) {
+	    Map<String, Object> result = SchoolService.getSchoolsStudio(districtId);
+	    
+	    model.addAttribute("schoolDetails", result.get("schoolDetails"));
+	  	    
+	    // Retrieve and add studio level status to the model
+	    String studioLevelStatus = (String) result.get("studioLevelStatus");
+	    model.addAttribute("studioLevelStatus", studioLevelStatus);
+	    
+	    return "SchoolManagement/districtManageStudio";
 	}
 	
-	@GetMapping("/declined/{id}")
-	public String declinedStudio(@PathVariable int id, Model model) {
-	    // Mock school details
-	    Map<String, Object> schoolDetail = new HashMap<>();
-	    schoolDetail.put("id", 1);
-	    schoolDetail.put("schoolName", "SK Pagoh");
-	    schoolDetail.put("district", "Pagoh");
-	    schoolDetail.put("teacherInCharge", "Ms. Syafidah");
-	    schoolDetail.put("studioLevel", 2);
-	    schoolDetail.put("equipmentImages", "https://drive.google.com/your-link-here"); // Example
-
-	    // List of equipment
-	    List<Map<String, String>> equipmentList = new ArrayList<>();
-	    equipmentList.add(Map.of("name", "TV Program/Show Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Editing Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Smartphone", "status", "No"));
-	    equipmentList.add(Map.of("name", "External Mic", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Monopod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Green Screen Set", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Tripod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Wireless Mic", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Webcam", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting (3 Point)", "status", "No"));
-	    equipmentList.add(Map.of("name", "Camera", "status", "No"));
-	    equipmentList.add(Map.of("name", "Editing Software", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Permanent Green Screen", "status", "No"));
-
-	    model.addAttribute("schoolDetail",schoolDetail);
-	    model.addAttribute("equipmentList", equipmentList);
-
-	    return "SchoolManagement/districtManageStudioDetail";
+	@GetMapping("/districtManageStudioDetail/{schoolId}")
+	public String viewDistrictManageStudioDetails(@PathVariable int schoolId, Model model) {
+	    // Fetch studio and equipment details
+	    Map<String, Object> studioAndEquipmentDetails = SchoolService.getStudioAndEquipmentDetails(schoolId);
+	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
+	    
+	    Map<Integer, String> allDistricts = SchoolService.getAllDistricts();
+	    model.addAttribute("allDistricts", allDistricts);
+	    
+	    // Get the district name based on the districtID of the school
+	    String districtName = allDistricts.get(schoolDetail.getDistrictID());
+	    model.addAttribute("districtName", districtName);
+	    
+	    UserModel teacher = SchoolService.getTeacherBySchoolId(schoolId);
+	    if (teacher != null) {
+	        model.addAttribute("teacherName", teacher.getName());
+	    } else {
+	        model.addAttribute("teacherName", "Not Assigned");
+	    }
+	    
+	    Map<Integer, Integer> allStudios = SchoolService.getAllStudios();
+	    model.addAttribute("allStudios", allStudios);
+	    
+	    // Get the studio level from the studioAndEquipmentDetails
+	    int studioLevel = (int) studioAndEquipmentDetails.get("studioLevel");
+	    model.addAttribute("studioLevel", studioLevel);
+	    
+	    // Retrieve and add studio level status to the model
+	    String studioLevelStatus = (String) studioAndEquipmentDetails.get("studioLevelStatus");
+	    model.addAttribute("studioLevelStatus", studioLevelStatus);
+	    
+	    
+	    // Add equipment list and images link to the model
+	    model.addAttribute("equipmentList", studioAndEquipmentDetails.get("equipmentList"));
+	    model.addAttribute("imagesLink", studioAndEquipmentDetails.get("imagesLink"));
+	   	    
+	    
+	    // Fetch school details to display
+	    model.addAttribute("schoolDetail", schoolDetail);
+	    
+	    return "SchoolManagement/districtManageStudioDetail"; // Return the view name
 	}
 	
-	@GetMapping("/stateDistrictsStudio")
-    public String viewDistrictsStudio(Model model) {
-		List<Map<String, Object>> districts = new ArrayList<>();
-
-        //District 1
-        Map<String, Object> district1 = new HashMap<>();
-        district1.put("dID", 1);
-        district1.put("districtName", "Batu Pahat");
-        district1.put("personInCharge", "Mr. Zulaifiq");
-        district1.put("totalSchools", "3");
-        districts.add(district1);
-        
-        //District 2
-        Map<String, Object> district2 = new HashMap<>();
-        district2.put("dID", 2);
-        district2.put("districtName", "Pagoh");
-        district2.put("personInCharge", "Ms. Anita");
-        district2.put("totalSchools", "5");
-        districts.add(district2);
-        
-      //District 3
-        Map<String, Object> district3 = new HashMap<>();
-        district3.put("dID", 3);
-        district3.put("districtName", "Kota Tinggi");
-        district3.put("personInCharge", "Mr. Afiq");
-        district3.put("totalSchools", "3");
-        districts.add(district3);
-        
-        // Add the map to the model
+	@PostMapping("/approved/{id}")
+	public String approveUpgrade(@PathVariable int id, RedirectAttributes redirectAttributes) {
+	    // Update the studioLevelStatus to "Approved" in the database
+	    SchoolService.updateStudioLevelStatus(id, "Approved");
+	    
+	    // Automatically update the studio level when approved
+	    SchoolService.updateStudioLevel(id);
+	    
+	    redirectAttributes.addFlashAttribute("message", "Upgrade request approved successfully.");
+	    return "redirect:/districtManageStudioDetail/" + id;
+	}
+ 
+	@PostMapping("/rejected/{id}")
+	public String declineUpgrade(@PathVariable int id, RedirectAttributes redirectAttributes) {
+	    // Update the studioLevelStatus to "Rejected" in the database
+	    SchoolService.updateStudioLevelStatus(id, "Rejected");
+	    
+	    // Automatically update the studio level when approved
+	    SchoolService.updateStudioLevel(id);
+	    
+	    redirectAttributes.addFlashAttribute("message", "Upgrade request declined successfully.");
+	    return "redirect:/districtManageStudioDetail/" + id;
+	}
+	
+	@GetMapping("/stateDistrictsStudioInfo")
+    public String viewDistrictsStudioInfo(Model model) {
+        List<Map<String, Object>> districts = SchoolService.getDistrictsWithDetails();
         model.addAttribute("districts", districts);
 
         return "SchoolManagement/stateDistrictsStudio"; // The name of the HTML/Thymeleaf template
     }
-	
-	@GetMapping("/stateManageStudio/{dID}")
-	public String viewDistrictSchoolsStudio(@PathVariable int dID, Model model) {
-		List<Map<String, Object>> schoolsList = new ArrayList<>();
-
-		// School 1
-        Map<String, Object> school1 = new HashMap<>();
-        school1.put("id", 1);
-        school1.put("schoolName", "SK Pagoh");
-        school1.put("teacherInCharge", "Ms. Syafidah");
-        school1.put("schoolPhone", "07-5562577");
-        school1.put("schoolAddress", "Sekolah Kebangsaan Pagoh, KM 33, Pekan Pagoh, 84600 Pagoh, Johor");
-        school1.put("postcode", 84600);
-        school1.put("district", "Pagoh");
-        school1.put("tvpssVersion", "2");
-        school1.put("studioLevel", "2");
-        school1.put("schoolLogo", "path/to/logo.png");
-        schoolsList.add(school1);
-        
-        // School 2
-        Map<String, Object> school2 = new HashMap<>();
-        school2.put("id", 2);
-        school2.put("schoolName", "SK Batu Pahat");
-        school2.put("teacherInCharge", "Ms. Afiqah");
-        school2.put("schoolPhone", "07-5562577");
-        school2.put("schoolAddress", "Sekolah Kebangsaan Batu Pahat, KM4, 83000 Batu Pahat, Johor ");
-        school2.put("postcode", 83000);
-        school2.put("district", "Batu Pahat");
-        school2.put("tvpssVersion", "3");
-        school2.put("studioLevel", "2");
-        school2.put("schoolLogo", "path/to/logo.png");
-        schoolsList.add(school2);
-
-	    // Add the list of schools to the model
-	    model.addAttribute("schoolsList", schoolsList);
-
-	    return "SchoolManagement/stateManageStudio";
-	}
-	
-	@GetMapping("/stateManageStudioDetail/{id}")
-	public String viewStudioDetail(@PathVariable int id, Model model) {
-	    // Mock school details
-	    Map<String, Object> schoolDetail = new HashMap<>();
-	    schoolDetail.put("id", id);
-	    schoolDetail.put("schoolName", "SK Pagoh");
-	    schoolDetail.put("district", "Pagoh");
-	    schoolDetail.put("teacherInCharge", "Ms. Syafidah");
-	    schoolDetail.put("studioLevel", 2);
-	    schoolDetail.put("equipmentImages", "https://drive.google.com/your-link-here"); // Example
-
-	    // List of equipment
-	    List<Map<String, String>> equipmentList = new ArrayList<>();
-	    equipmentList.add(Map.of("name", "TV Program/Show Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Editing Corner", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Smartphone", "status", "No"));
-	    equipmentList.add(Map.of("name", "External Mic", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Monopod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Green Screen Set", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Tripod", "status", "No"));
-	    equipmentList.add(Map.of("name", "Wireless Mic", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Webcam", "status", "No"));
-	    equipmentList.add(Map.of("name", "Mobile Lighting (3 Point)", "status", "No"));
-	    equipmentList.add(Map.of("name", "Camera", "status", "No"));
-	    equipmentList.add(Map.of("name", "Editing Software", "status", "Yes"));
-	    equipmentList.add(Map.of("name", "Permanent Green Screen", "status", "No"));
-
-	    model.addAttribute("schoolDetail",schoolDetail);
-	    model.addAttribute("equipmentList", equipmentList);
-
-	    return "SchoolManagement/stateManageStudioDetail";
-	}
 
 }

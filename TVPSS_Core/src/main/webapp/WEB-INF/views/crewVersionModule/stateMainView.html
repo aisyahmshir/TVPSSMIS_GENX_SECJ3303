@@ -135,14 +135,14 @@ display:inline !important;
     <hr class="my-4 border-t-2 border-gray-800">
 
     <!-- District Select Filter -->
-    <div class="mb-4">
-        <label for="districtSelect">Select District</label>
-        <select id="districtSelect" class="form-control">
-            <option value="">All Districts</option>
-            <!-- Loop through the districts list to populate the dropdown -->
-            <option th:each="district : ${districts}" th:value="${district}" th:text="${district}"></option>
-        </select>
-    </div>
+                <div class="mb-4">
+                    <label for="districtSelect">Select District</label>
+                    <select id="districtSelect" class="form-control">
+                        <option value="">All Districts</option>
+                        <!-- Loop through the districts list to populate the dropdown -->
+                        <option th:each="district : ${district}" th:value="${district}" th:text="${district}"></option>
+                    </select>
+                </div>
 
     <!-- DataTable -->
     <table id="resultTable" class="display" style="width:100%">
@@ -150,22 +150,24 @@ display:inline !important;
             <tr class="bg-blue-500 text-white">
                 <th>School Name</th>
                 <th>School Address</th>
+                <th>PIC Name</th>
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Loop through the schools data and render each row -->
-            <tr th:each="school : ${schools}">
-                <td th:text="${school.name}"></td>
-                <td th:text="${school.address}"></td>
-                <td>
-				<a class="btn btn-primary viewMoreBtn" 
-				   th:href="@{/viewCrewSchool/{id}(id=${school.id})}">
-				   View More
-				</a>
-                </td>
-            </tr>
-        </tbody>
+                    <tbody>
+                        <!-- Loop through the schools data and render each row -->
+                        <tr th:each="school : ${schools}">
+                            <td th:text="${school.name}"></td>
+                            <td th:text="${school.fullAddress}"></td>
+ 							<td th:text="${userMap[school.schoolID] != null ? userMap[school.schoolID].name : 'No User'}"></td> <!-- If User exists -->
+                            <td>
+                                <a class="btn btn-primary viewMoreBtn" 
+                                   th:href="@{/viewCrewSchool/{id}(id=${school.schoolID})}">
+                                   View More
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
     </table>
 
 </main>

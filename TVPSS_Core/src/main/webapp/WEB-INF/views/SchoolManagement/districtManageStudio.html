@@ -129,34 +129,29 @@ width:100% !important;
 			    </button>
                 </div>
                 <!-- DataTable -->
-                <table id="resultTable" class="display" style="width:100%">
-                    <thead>
-		                <tr>
-		                    <th>School</th>
-		                    <th>Studio Level</th>
-		                    <th>TV Program/Show Corner</th>
-		                    <th>Editing Corner</th>
-		                    <th>Equipments</th>
-		                    <th>Action</th>
-		                </tr>
-		            </thead>
-		            <tbody>
-		                <!-- Use Thymeleaf to iterate through districts -->
-		                <tr th:each="school : ${school}">
-		                    <td th:text="${school.schoolName}"></td>
-		                    <td th:text="${school.studioLevel}"></td>
-		                    <td th:text="${school.tvCorner}"></td>
-		                    <td th:text="${school.editCorner}"></td>
-		                    <td th:text="${school.equipments}"></td>
-		                    <td>
-                                <a class="btn btn-primary viewMoreBtn" 
-								   th:href="@{/districtManageStudioDetail/{id}(id=${school.id})}">
-								  	View More
-								</a>
-                            </td>
-		                </tr>
-		            </tbody>
-                </table>
+				<table id="resultTable" class="display" style="width:100%">
+				    <thead>
+				        <tr>
+				            <th>School</th>
+				            <th>Studio Level</th>
+				            <th>Available Equipments</th>
+				            <th>Action</th>
+				        </tr>
+				    </thead>
+				    <tbody>
+				        <tr th:each="schoolEntry : ${schoolDetails}">
+				            <td th:text="${schoolEntry['schoolName']}"></td>
+				            <td th:text="${schoolEntry['studioLevel']}"></td>
+				            <td th:text="${schoolEntry['availableEquipmentCount']}"></td>
+				            <td>
+				                <a class="btn btn-primary viewMoreBtn" 
+				                   th:href="@{/districtManageStudioDetail/{id}(id=${schoolEntry['schoolID']})}">
+				                    View More
+				                </a>
+				            </td>
+				        </tr>
+				    </tbody>
+				</table>
 			</main>
 			<footer class="bg-blue-900 text-white text-center py-4">
           		<p>Ministry of Education | TVPSS Application Portal</p>
@@ -223,6 +218,7 @@ width:100% !important;
                 modal.find('#googleDriveLink').val(imageUrl);
             });
         });
+
     </script>
 </body>
 </html>

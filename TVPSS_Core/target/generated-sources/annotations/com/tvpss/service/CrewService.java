@@ -1,5 +1,6 @@
 package com.tvpss.service;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -179,7 +180,7 @@ public class CrewService {
 }
 
 // FOR TEACHER MODULE
-    public static List<Map<String, Object>> getCrewsWithNamesBySchoolId(Long long1) {
+    public static List<Map<String, Object>> getCrewsWithNamesBySchoolId(int long1) {
         List<Map<String, Object>> crewWithNames = new ArrayList<>();
         String query = "SELECT * FROM tvpss_crew_info WHERE schoolID = ? AND status = 'Approved'";
 
@@ -263,7 +264,7 @@ public class CrewService {
         return userNames;
     }
     
-    public static UserModel getTeacherBySchoolId(Long long1) {
+    public static UserModel getTeacherBySchoolId(int long1) {
     	String query = "SELECT u.* FROM user u " +
                 "WHERE u.schoolID = ? AND u.role = 'Teacher'";
 
@@ -298,13 +299,13 @@ public class CrewService {
                 if (rs.next()) {
                     // Construct and return a School object based on the result set
                     School school = new School();
-                    school.setSchoolID(rs.getLong("schoolID"));
+                    school.setSchoolID(rs.getInt("schoolID"));
                     school.setName(rs.getString("name"));
                     school.setState(rs.getString("state"));
                     school.setFullAddress(rs.getString("fullAddress"));
                     school.setContactNo(rs.getString("contactNo"));
                     school.setVersionImageURL(rs.getString("versionImageURL"));
-                    school.setDistrictID(rs.getLong("districtID"));
+                    school.setDistrictID(rs.getInt("districtID"));
                     school.setTvpssVersion(rs.getInt("tvpssVersion"));
                     
                     return school;
@@ -317,7 +318,7 @@ public class CrewService {
     }
     
     public static boolean submitTVPSSApplication(int schoolID, java.sql.Date dateApplied, String url, String status, int versionApplied) {
-        String insertQuery = "INSERT INTO `tvpssversionapplication`(`schoolID`, `dateApplied`, `url`, `versionApplied`) " +
+        String insertQuery = "INSERT INTO tvpssversionapplication(schoolID, dateApplied, url, versionApplied) " +
                              "VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
@@ -427,7 +428,7 @@ public class CrewService {
     }
     
     // New method to update student status in bulk
-    public static void updateStudentStatus(List<Long> studentIds, String status) {
+    public static void updateStudentStatus(List<Integer> studentIds, String status) {
         // Dynamically construct the placeholders for the IN clause
         String placeholders = studentIds.stream()
                                          .map(id -> "?")
@@ -444,7 +445,7 @@ public class CrewService {
 
             // Set each student ID parameter
             for (int i = 0; i < studentIds.size(); i++) {
-                stmt.setLong(i + 2, studentIds.get(i)); // Start from index 2 because index 1 is for `status`
+                stmt.setInt(i + 2, studentIds.get(i)); // Start from index 2 because index 1 is for status
             }
 
             // Execute the update query
@@ -452,6 +453,519 @@ public class CrewService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+    
+    
+    public static Map<String, Object> getSchoolsAndUsers() {
+        Map<String, Object> result = new HashMap<>();
+        List<School> schools = new ArrayList<>();
+        List<UserModel> users = new ArrayList<>();
+
+        String query = "SELECT s.schoolID, " +
+                "s.name AS schoolName, " +
+                "s.state, " +
+                "s.fullAddress, " +
+                "s.contactNo AS schoolContactNo, " +
+                "s.versionImageURL, " +
+                "s.logo, " +
+                "s.districtID AS schoolDistrictID, " +
+                "s.tvpssVersion, " +
+                "u.id AS userID, " +
+                "u.userID AS userUserID, " +
+                "u.name AS userName, " +
+                "u.contactNo AS userContactNo, " +
+                "u.email, " +
+                "u.status, " +
+                "u.role, " +
+                "u.password, " +
+                "u.lastActive, " +
+                "u.session, " +
+                "u.districtID AS userDistrictID, " +
+                "u.schoolID AS userSchoolID " +
+                "FROM school s " +
+                "INNER JOIN user u ON u.schoolID = s.schoolID " +
+                "WHERE u.role = 'Teacher' AND u.schoolID = s.schoolID";
+
+
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+        	     PreparedStatement stmt = conn.prepareStatement(query);
+        	     ResultSet rs = stmt.executeQuery()) {
+
+        	    while (rs.next()) {
+        	        // Populate School object
+        	        School school = new School();
+        	        school.setSchoolID(rs.getInt("schoolID"));
+        	        school.setName(rs.getString("schoolName"));
+        	        school.setState(rs.getString("state"));
+        	        school.setFullAddress(rs.getString("fullAddress"));
+        	        school.setContactNo(rs.getString("schoolContactNo"));
+        	        school.setVersionImageURL(rs.getString("versionImageURL"));
+//        	        school.setLogo(rs.getBytes("logo"));
+        	        school.setDistrictID(rs.getInt("schoolDistrictID"));
+        	        school.setTvpssVersion(rs.getInt("tvpssVersion"));
+
+        	        // Add school to list
+        	        schools.add(school);
+
+        	        // Populate UserModel object
+        	        if (rs.getInt("userID") != 0) { // Ensure there's user data
+        	            UserModel user = new UserModel();
+        	            user.setId(rs.getInt("userID"));
+        	            user.setUserID(rs.getString("userUserID"));
+        	            user.setName(rs.getString("userName"));
+        	            user.setContactNo(rs.getString("userContactNo"));
+        	            user.setEmail(rs.getString("email"));
+        	            user.setStatus(rs.getString("status"));
+        	            user.setRole(rs.getString("role"));
+        	            user.setPassword(rs.getString("password"));
+        	            user.setLastActive(rs.getTimestamp("lastActive"));
+        	            user.setSession(rs.getString("session"));
+        	            user.setDistrictID(rs.getInt("userDistrictID"));
+        	            user.setSchoolID(rs.getInt("userSchoolID"));
+
+        	            // Add user to list
+        	            users.add(user);
+        	        }
+        	    }
+        	} catch (SQLException e) {
+        	    e.printStackTrace();
+        	}
+
+
+        // Add lists to the result map
+        result.put("schools", schools);
+        result.put("users", users);
+
+        return result;
+    }
+    
+    public static List<String> getCrewNamesByDistrictIDs(List<Integer> districtIDs) {
+        List<String> crewNames = new ArrayList<>();
+        
+        // Build the SQL query with a dynamic number of ? placeholders
+        StringBuilder query = new StringBuilder("SELECT name FROM district WHERE districtID IN (");
+        for (int i = 0; i < districtIDs.size(); i++) {
+            query.append("?");
+            if (i < districtIDs.size() - 1) {
+                query.append(", ");
+            }
+        }
+        query.append(")");
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+
+            // Set each districtID as a separate parameter
+            for (int i = 0; i < districtIDs.size(); i++) {
+                stmt.setInt(i + 1, districtIDs.get(i)); // Use setLong for Long type
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    crewNames.add(rs.getString("name"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return crewNames;
+    }
+
+    public static Map<String, Object> getTVPSSCrewVersionInfo(int schoolId) {
+        Map<String, Object> schoolData = new HashMap<>();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // Query to get school information
+            String schoolQuery = "SELECT * FROM school WHERE schoolID = ?";
+            try (PreparedStatement schoolStmt = conn.prepareStatement(schoolQuery)) {
+                schoolStmt.setInt(1, schoolId);
+
+                try (ResultSet rs = schoolStmt.executeQuery()) {
+                    if (rs.next()) {
+                        schoolData.put("id", rs.getInt("schoolID"));
+                        schoolData.put("name", rs.getString("name"));
+                        schoolData.put("address", rs.getString("fullAddress"));
+                        schoolData.put("version", rs.getString("tvpssVersion"));
+                        schoolData.put("image", rs.getString("versionImageURL"));
+                    }
+                }
+            }
+
+            // Get associated crew members with names
+            List<Map<String, Object>> crewsWithNames = getCrewsWithNamesBySchoolId((int) schoolId);
+            List<String> crewNames = new ArrayList<>();
+
+            for (Map<String, Object> crewData : crewsWithNames) {
+                System.out.println("Crew name: " + crewData.get("name"));
+                crewNames.add((String) crewData.get("name"));
+            }
+            schoolData.put("crew", crewNames);
+
+            // Get associated teacher
+            UserModel teacher = getTeacherBySchoolId((int) schoolId);
+            schoolData.put("teacher", teacher != null ? teacher.getName() : "N/A");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return schoolData;
+    }
+
+    
+    public static Integer getDistrictIdByUserId(Integer userID) {
+        if (userID == null) {
+            throw new IllegalStateException("User ID cannot be null.");
+        }
+
+        Integer districtID = null;
+
+        // Database connection
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // SQL query to fetch the districtID
+            String query = "SELECT districtID FROM user WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, userID);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        districtID = rs.getInt("districtID");
+                    } else {
+                        throw new IllegalStateException("No district found for the provided user ID.");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to fetch district ID from the database.");
+        }
+
+        return districtID;
+    }
+    
+    public static Map<String, Object> getSchoolsAndUsersByDistrict(Integer districtID) {
+        Map<String, Object> result = new HashMap<>();
+        List<School> schools = new ArrayList<>();
+        List<UserModel> users = new ArrayList<>();
+
+        String query = "SELECT s.schoolID, " +
+                "s.name AS schoolName, " +
+                "s.state, " +
+                "s.fullAddress, " +
+                "s.contactNo AS schoolContactNo, " +
+                "s.versionImageURL, " +
+                "s.logo, " +
+                "s.districtID AS schoolDistrictID, " +
+                "s.tvpssVersion, " +
+                "u.id AS userID, " +
+                "u.userID AS userUserID, " +
+                "u.name AS userName, " +
+                "u.contactNo AS userContactNo, " +
+                "u.email, " +
+                "u.status, " +
+                "u.role, " +
+                "u.password, " +
+                "u.lastActive, " +
+                "u.session, " +
+                "u.districtID AS userDistrictID, " +
+                "u.schoolID AS userSchoolID " +
+                "FROM school s " +
+                "INNER JOIN user u ON u.schoolID = s.schoolID " +
+                "WHERE u.role = 'Teacher' AND s.districtID = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            // Set the districtID in the query
+            stmt.setInt(1, districtID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    // Populate School object
+                    School school = new School();
+                    school.setSchoolID(rs.getInt("schoolID"));
+                    school.setName(rs.getString("schoolName"));
+                    school.setState(rs.getString("state"));
+                    school.setFullAddress(rs.getString("fullAddress"));
+                    school.setContactNo(rs.getString("schoolContactNo"));
+                    school.setVersionImageURL(rs.getString("versionImageURL"));
+//                    school.setLogo(rs.getBytes("logo"));
+                    school.setDistrictID(rs.getInt("schoolDistrictID"));
+                    school.setTvpssVersion(rs.getInt("tvpssVersion"));
+
+                    // Add school to list
+                    schools.add(school);
+
+                    // Populate UserModel object
+                    if (rs.getInt("userID") != 0) { // Ensure there's user data
+                        UserModel user = new UserModel();
+                        user.setId(rs.getInt("userID"));
+                        user.setUserID(rs.getString("userUserID"));
+                        user.setName(rs.getString("userName"));
+                        user.setContactNo(rs.getString("userContactNo"));
+                        user.setEmail(rs.getString("email"));
+                        user.setStatus(rs.getString("status"));
+                        user.setRole(rs.getString("role"));
+                        user.setPassword(rs.getString("password"));
+                        user.setLastActive(rs.getTimestamp("lastActive"));
+                        user.setSession(rs.getString("session"));
+                        user.setDistrictID(rs.getInt("userDistrictID"));
+                        user.setSchoolID(rs.getInt("userSchoolID"));
+
+                        // Add user to list
+                        users.add(user);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Add lists to the result map
+        result.put("schools", schools);
+        result.put("users", users);
+
+        return result;
+    }
+
+    public static List<Map<String, Object>> getTVPSSVersionApplication(int userId) {
+        List<Map<String, Object>> applicationDetails = new ArrayList<>();
+
+        // Queries
+        String getDistrictIDQuery =
+            "SELECT districtID FROM user WHERE id = ?";
+        String getApplicationQuery =
+            "SELECT v.id, v.schoolID, v.dateApplied, v.url, v.status, v.versionApplied " +
+            "FROM tvpssversionapplication v " +
+            "JOIN school s ON v.schoolID = s.schoolID " +
+            "WHERE s.districtID = ? AND status = 'Pending'";
+        String getSchoolDetailsQuery =
+            "SELECT schoolID, name AS schoolName, fullAddress, contactNo, versionImageURL FROM school WHERE schoolID = ?";
+        String getTeacherDetailsQuery =
+            "SELECT id, name, email, contactNo FROM user WHERE role = 'Teacher' AND schoolID = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // Step 1: Get districtID for the given user ID
+            String districtID = null;
+            try (PreparedStatement stmt = conn.prepareStatement(getDistrictIDQuery)) {
+                stmt.setInt(1, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        districtID = rs.getString("districtID");
+                    }
+                }
+            }
+
+            if (districtID == null) {
+                throw new IllegalArgumentException("No districtID found for the given user ID");
+            }
+
+            // Step 2: Get application details matching the districtID
+            List<Map<String, String>> applicationList = new ArrayList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(getApplicationQuery)) {
+                stmt.setString(1, districtID);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, String> appMap = new HashMap<>();
+                        appMap.put("id", rs.getString("id"));
+                        appMap.put("schoolID", rs.getString("schoolID"));
+                        appMap.put("dateApplied", rs.getString("dateApplied"));
+                        appMap.put("url", rs.getString("url"));
+                        appMap.put("status", rs.getString("status"));
+                        appMap.put("versionApplied", rs.getString("versionApplied"));
+                        applicationList.add(appMap);
+                    }
+                }
+            }
+
+            // Step 3: For each application, fetch school details and teacher details
+            for (Map<String, String> application : applicationList) {
+                Map<String, Object> applicationDetail = new HashMap<>(application);
+
+                // Fetch school details
+                try (PreparedStatement stmt = conn.prepareStatement(getSchoolDetailsQuery)) {
+                    stmt.setString(1, application.get("schoolID"));
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                        	System.out.println("school "+ rs.getString("schoolName"));
+                            applicationDetail.put("schoolName", rs.getString("schoolName"));
+                            applicationDetail.put("schoolAddress", rs.getString("fullAddress"));
+                            applicationDetail.put("schoolContact", rs.getString("contactNo"));
+                        }
+                    }
+                }
+
+                // Fetch teacher details associated with the application
+                List<Map<String, String>> teacherDetails = new ArrayList<>();
+                try (PreparedStatement stmt = conn.prepareStatement(getTeacherDetailsQuery)) {
+                    stmt.setString(1, application.get("schoolID"));
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        while (rs.next()) {
+                            Map<String, String> teacher = new HashMap<>();
+                            System.out.println("teacher "+ rs.getString("name"));
+                            teacher.put("id", rs.getString("id"));
+                            teacher.put("teacherName", rs.getString("name"));
+                            teacher.put("email", rs.getString("email"));
+                            teacher.put("contactNo", rs.getString("contactNo"));
+                            teacherDetails.add(teacher);
+                        }
+                    }
+                }
+                applicationDetail.put("teacherDetails", teacherDetails);
+
+                // Add to the final details list
+                applicationDetails.add(applicationDetail);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return applicationDetails;
+    }
+
+
+
+    // Update the status of the application to 'Approved' based on the given id
+ // Update the status of the application to 'Approved' and increment the TVPSS_Version for the related school
+    public static boolean updateApproveApplicationTvpssVersion(int id) {
+        String updateStatusQuery = 
+            "UPDATE tvpssversionapplication SET status = 'Approved' WHERE id = ?";
+        String getSchoolIdQuery = 
+            "SELECT schoolID FROM tvpssversionapplication WHERE id = ?";
+        String updateSchoolVersionQuery = 
+            "UPDATE school SET tvpssVersion = tvpssVersion + 1 WHERE schoolID = ?";
+        String getEmailQuery = 
+            "SELECT email FROM user WHERE schoolID = ? AND role = 'Teacher'";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+            // Set auto-commit to false for transaction management
+            conn.setAutoCommit(false);
+
+            // Update the status to 'Approved'
+            try (PreparedStatement updateStatusStmt = conn.prepareStatement(updateStatusQuery)) {
+                updateStatusStmt.setInt(1, id);
+                int rowsAffected = updateStatusStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    conn.rollback();
+                    return false; // No rows updated
+                }
+            }
+
+            // Get the schoolID associated with the application
+            int schoolID;
+            try (PreparedStatement getSchoolIdStmt = conn.prepareStatement(getSchoolIdQuery)) {
+                getSchoolIdStmt.setInt(1, id);
+                try (ResultSet rs = getSchoolIdStmt.executeQuery()) {
+                    if (rs.next()) {
+                        schoolID = rs.getInt("schoolID");
+                    } else {
+                        conn.rollback();
+                        return false; // No schoolID found
+                    }
+                }
+            }
+
+            // Increment the TVPSS_Version for the retrieved schoolID
+            try (PreparedStatement updateSchoolVersionStmt = conn.prepareStatement(updateSchoolVersionQuery)) {
+                updateSchoolVersionStmt.setInt(1, schoolID);
+                int rowsAffected = updateSchoolVersionStmt.executeUpdate();
+                if (rowsAffected == 0) {
+                    conn.rollback();
+                    return false; // No rows updated in the school table
+                }
+            }
+
+            // Fetch the email of the teacher
+            String teacherEmail = null;
+            try (PreparedStatement getEmailStmt = conn.prepareStatement(getEmailQuery)) {
+                getEmailStmt.setInt(1, schoolID);
+                try (ResultSet rs = getEmailStmt.executeQuery()) {
+                    if (rs.next()) {
+                        teacherEmail = rs.getString("email");
+                    }
+                }
+            }
+
+            // Commit the transaction
+            conn.commit();
+
+            // If an email is found, send the approval email
+            if (teacherEmail != null) {
+                EmailService.sendApprovalEmail(teacherEmail);
+            }
+            return true;
+        } catch (SQLException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return false; // Return false if an exception occurs
+        }
+    }
+
+    
+    public static boolean updateRejectedApplicationTvpssVersion(int id, String rejectReason) throws UnsupportedEncodingException {
+    	  String updateStatusQuery = 
+    		        "UPDATE tvpssversionapplication SET status = 'Rejected', rejectReason = ? WHERE id = ?";
+    		    String getSchoolIDQuery = 
+    		        "SELECT schoolID FROM tvpssversionapplication WHERE id = ?";
+    		    String getTeacherEmailQuery = 
+    		        "SELECT email FROM user WHERE schoolID = ? AND role = 'Teacher'";
+
+    		    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD)) {
+    		        conn.setAutoCommit(false); // Start transaction
+
+    		        // Step 1: Update the application status and reject reason
+    		        try (PreparedStatement updateStmt = conn.prepareStatement(updateStatusQuery)) {
+    		            updateStmt.setString(1, rejectReason);
+    		            updateStmt.setInt(2, id);
+    		            int rowsAffected = updateStmt.executeUpdate();
+
+    		            if (rowsAffected == 0) {
+    		                conn.rollback();
+    		                return false; // No rows updated
+    		            }
+    		        }
+
+    		        // Step 2: Get the schoolID from tvpssversionapplication
+    		        int schoolID;
+    		        try (PreparedStatement getSchoolStmt = conn.prepareStatement(getSchoolIDQuery)) {
+    		            getSchoolStmt.setInt(1, id);
+    		            ResultSet rs = getSchoolStmt.executeQuery();
+    		            if (rs.next()) {
+    		                schoolID = rs.getInt("schoolID");
+    		            } else {
+    		                conn.rollback();
+    		                return false; // No schoolID found
+    		            }
+    		        }
+
+    		        // Step 3: Get the email of the teacher from the user table
+    		        String teacherEmail = null;
+    		        try (PreparedStatement getEmailStmt = conn.prepareStatement(getTeacherEmailQuery)) {
+    		            getEmailStmt.setInt(1, schoolID);
+    		            ResultSet rs = getEmailStmt.executeQuery();
+    		            if (rs.next()) {
+    		                teacherEmail = rs.getString("email");
+    		            } else {
+    		                conn.rollback();
+    		                return false; // No teacher email found
+    		            }
+    		        }
+
+    		        // Step 4: Commit the transaction
+    		        conn.commit();
+
+    		        // Step 5: Send the rejection email
+    		        if (teacherEmail != null) {
+    		            EmailService.sendRejectionEmail(teacherEmail, rejectReason);
+    		        }
+    		        return true;
+
+    		    } catch (SQLException e) {
+    		        e.printStackTrace();
+    		        return false; // Return false if an exception occurs
+    		    }
     }
 
 

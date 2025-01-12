@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Details</title>
+    <title>TVPSS CORE</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Bootstrap CSS -->
@@ -68,58 +68,53 @@
 
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <div class="flex flex-col md:flex-row items-center mb-6">
-                        <!-- School Logo -->
-                        <div class="w-48 h-48 mb-4 md:mb-0 md:mr-6">
-                            <img th:src="@{/images/skPagoh.jpg}" alt="School Logo" class="object-cover w-full h-full rounded-lg">
-                        </div>
-
-                        <!-- School Details -->
                         <div class="flex-1">
                             <table class="table table-borderless w-full text-sm">
                                 <tbody>
                                     <tr>
-                                        <td class="font-bold text-gray-700">School Name:</td>
-                                        <td th:text="${schoolDetail.schoolName}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-bold text-gray-700">Teacher In-Charge:</td>
-                                        <td th:text="${schoolDetail.teacherInCharge}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-bold text-gray-700">School Phone No.:</td>
-                                        <td th:text="${schoolDetail.schoolPhone}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-bold text-gray-700">School Address:</td>
-                                        <td th:text="${schoolDetail.schoolAddress}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-bold text-gray-700">Postcode:</td>
-                                        <td th:text="${schoolDetail.postcode}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-bold text-gray-700">District:</td>
-                                        <td th:text="${schoolDetail.district}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-bold text-gray-700">TVPSS Version:</td>
-                                        <td th:text="${schoolDetail.tvpssVersion}"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="font-bold text-gray-700">Studio Level:</td>
-                                        <td th:text="${schoolDetail.studioLevel}"></td>
-                                    </tr>
-                                </tbody>
+                        <td class="font-bold text-gray-700">School Name:</td>
+                        <td th:text="${schoolDetail.name}"></td>
+                    </tr>
+                    <tr>
+    					<td class="font-bold text-gray-700">Teacher In-Charge:</td>
+    					<td th:text="${teacherName}"></td>
+					</tr>
+                    <tr>
+                        <td class="font-bold text-gray-700">School Phone No.:</td>
+                        <td th:text="${schoolDetail.contactNo}"></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-gray-700">School Address:</td>
+                        <td th:text="${schoolDetail.fullAddress}"></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-gray-700">State:</td>
+                        <td th:text="${schoolDetail.state}"></td> <!-- Ensure this field exists in your School object -->
+                    </tr>
+                    <tr>
+    					<td class="font-bold text-gray-700">District:</td>
+    					<td th:text="${districtName}"></td>
+					</tr>
+                    <tr>
+                         <td class="font-bold text-gray-700">TVPSS Version:</td>
+                         <td th:text="${schoolDetail.tvpssVersion}"></td>
+                         </tr>
+                    <tr>
+                     	<td class="font-bold text-gray-700">Studio Level:</td>
+                          <td th:text="${studioLevel}"></td>
+                    </tr>
+                	</tbody>
                             </table>
-                        </div>
-                    </div>
-                    <div class="flex justify-end">
+                            <div class="flex justify-end">
                         <a class="btn btn-primary viewMoreBtn" 
-								   th:href="@{/editSchool/{id}(id=${schoolDetail.id})}">
+								   th:href="@{/editSchool/{id}(id=${schoolDetail.schoolID})}">
 								   Edit
 						</a>
                     </div>
                 </div>
+                        </div>
+                    </div>
+                    
             </main>
             <footer class="bg-blue-900 text-white text-center py-4">
           	<p>Ministry of Education | TVPSS Application Portal</p>

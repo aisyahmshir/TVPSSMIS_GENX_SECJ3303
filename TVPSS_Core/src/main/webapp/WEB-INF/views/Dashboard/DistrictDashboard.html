@@ -28,40 +28,7 @@
     <!-- Main Container -->
     <div class="flex h-screen">
         <!-- Sidebar -->
-<aside id="sidebar" class="bg-blue-900 text-white w-64 fixed h-full transition-transform transform -translate-x-full z-40">
-    <ul class="space-y-4 p-4">
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
-                Dashboard
-            </a>
-        </li>
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="Equipments Icon" class="h-6 w-6 mr-2">
-                Studio Level
-            </a>
-        </li>
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="Events Icon" class="h-6 w-6 mr-2">
-                Content Library
-            </a>
-        </li>
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="TVPSS Info & Crew Icon" class="h-6 w-6 mr-2">
-                TVPSS Version & Crew
-            </a>
-        </li>
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
-                School
-            </a>
-        </li>
-    </ul>
-</aside>
+    <div th:include="sideBar.html"></div>
 
 <!-- Overlay -->
 <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
@@ -98,22 +65,22 @@
 							<div class="summary-cards grid grid-cols-1 gap-4 place-items-center h-full">
 							    <!-- Total School Card -->
 							    <div class="card total-school bg-blue-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
-							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">25</div>
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold" th:text="${totalSchool}"></div>
 							        <span class="text-sm font-medium text-center mt-2">Total School</span>
 							    </div>
 							    <!-- Completed Requests -->
 							    <div class="card total-districts bg-green-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
-							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">17</div>
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold" th:text="${approvedReq}"></div>
 							        <span class="text-sm font-medium text-center mt-2">Completed Requests</span>
 							    </div>
 							    <!-- Pending Requests -->
 							    <div class="card total-content bg-orange-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
-							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">5</div>
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold" th:text="${pendingReq}"></div>
 							        <span class="text-sm font-medium text-center mt-2">Pending Requests</span>
 							    </div>
 							    <!-- Rejected Requests -->
 							    <div class="card total-content bg-red-100 p-8 rounded-lg shadow-md flex flex-col justify-between w-full">
-							        <div class="flex-grow flex items-center justify-center text-5xl font-bold">3</div>
+							        <div class="flex-grow flex items-center justify-center text-5xl font-bold" th:text="${rejectedReq}"></div>
 							        <span class="text-sm font-medium text-center mt-2">Rejected Requests</span>
 							    </div>
 							</div>
@@ -125,7 +92,7 @@
                     <div class="col-span-9">
                         <!-- TVPSS Level Status with Pie Chart -->
                         <div class="equipment-card bg-white p-6 rounded-lg shadow-md mb-6">
-                            <h2 class="text-xl font-semibold mb-4">TVPSS Level Status</h2>
+                            <h2 class="text-xl font-semibold mb-4">Studio Level Status</h2>
                             <div class="bar-chart-container h-52 w-65" style="width:'400px'">
                                 <!-- pie Chart -->
                                 <canvas id="pieChart"></canvas>
@@ -133,7 +100,7 @@
                         </div>
                             <!-- First Row: Total Equipment with Bar Chart -->
 						<div class="tpss-level-status-card bg-white p-6 rounded-lg shadow-md">
-						    <h2 class="text-xl font-semibold mb-4">Total Equipment</h2>
+						    <h2 class="text-xl font-semibold mb-4">TVPSS version status</h2>
 						    <div class="pie-chart-container h-72 w-full flex items-center justify-center">
 						        <!-- bar Chart -->
 						        <canvas id="barChart"></canvas>
@@ -193,8 +160,8 @@
                 datasets: [{
                     label: 'Total Equipments Category',
                     data: barData, // Fixed data
-                    backgroundColor: ['#92eb34', '#FFCD56', '#0370ff', '#8103ff'],
-                    borderColor: ['#92eb34', '#FFCD56', '#0370ff', '#8103ff'],
+                    backgroundColor: ['#92eb34', '#FFCD56', '#0370ff', '#FF6384'],
+                    borderColor: ['#92eb34', '#FFCD56', '#0370ff', '#FF6384'],
                     borderWidth: 1
                 }]
             },

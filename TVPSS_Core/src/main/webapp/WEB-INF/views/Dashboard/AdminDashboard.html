@@ -169,40 +169,7 @@
     <!-- Main Container -->
     <div class="flex h-screen">
         <!-- Sidebar -->
-<aside id="sidebar" class="bg-blue-900 text-white w-64 fixed h-full transition-transform transform -translate-x-full z-40">
-    <ul class="space-y-4 p-4">
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
-                Dashboard
-            </a>
-        </li>
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="Equipments Icon" class="h-6 w-6 mr-2">
-                Studio Level
-            </a>
-        </li>
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="Events Icon" class="h-6 w-6 mr-2">
-                Content Library
-            </a>
-        </li>
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="TVPSS Info & Crew Icon" class="h-6 w-6 mr-2">
-                TVPSS Version & Crew
-            </a>
-        </li>
-        <li>
-            <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
-                School
-            </a>
-        </li>
-    </ul>
-</aside>
+		<div th:include="sideBar.html">
 
 <!-- Overlay -->
 <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
@@ -210,7 +177,9 @@
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
 
         <!-- Main Content -->
-<div id="contentWrapper" class="flex-1 flex flex-col transition-all">
+<div id="contentWrapper" class="flex-1 flex flex-col transition-all ml-64">
+
+
 
             <!-- Header -->
 		<div th:include="header.html"></div>
@@ -225,8 +194,8 @@
 				    <div class="card p-3 shadow-sm mr-5" style="flex: 0.70; width: 15vw; height: 400px;">
 				        <div class="text-center mb-3">
 				            <div>Active Users (Today)</div>
-				            <div id="active-users-count" style="font-size: 40px;">97</div>
-				            <div id="current-date"></div>
+				            <div id="active-users-count" style="font-size: 40px;" th:text="${totalActiveToday}"></div>
+				            <div id="current-date" th:text="${currentDate}"></div>
 				        </div>
 				        <div class="d-flex justify-content-center mb-3">
 				            <div class="d-flex align-items-center gap-1 me-3" style="font-size: 10px;">
@@ -261,27 +230,27 @@
 						        <div class="d-flex flex-column align-items-center">
 						            <div class="card text-white" style="width: 200px; height: 200px; background-color: #5199c2; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
 						                <img th:src="@{/images/userIcon.png}" alt="Logo 1" style="width: 80px; height: 80px;">
-						                <div class="fw-bold fs-3 text-dark">790</div> <!-- Text under the image -->
+						                <div class="fw-bold fs-3 text-dark" th:text="${totalUser}"></div> <!-- Text under the image -->
 						            </div>
-						            <div class="fw-bold fs-4 mt-3">Total Users</div>
+						            <div class="fw-bold fs-4 mt-3">Total Users <br> &nbsp; </div>
 						        </div>
 						
 						        <!-- Card 2 -->
 						        <div class="d-flex flex-column align-items-center">
 						            <div class="card text-white" style="width: 200px; height: 200px; background-color: #5199c2; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-						                <img th:src="@{/images/userIcon.png}" alt="Logo 2" style="width: 80px; height: 80px;">
-						                <div class="fw-bold fs-3 text-dark">89</div> <!-- Text under the image -->
+						                <img th:src="@{/images/activeUserIcon.png}" alt="Logo 2" style="width: 80px; height: 80px;">
+						                <div class="fw-bold fs-3 text-dark" th:text="${totalActiveUser}"></div> <!-- Text under the image -->
 						            </div>
-						            <div class="fw-bold fs-4 mt-3">Active Users</div>
+						            <div class="fw-bold fs-4 mt-3">Active Users <br> (<3 days)</div>
 						        </div>
 						
 						        <!-- Card 3 -->
 						        <div class="d-flex flex-column align-items-center">
 						            <div class="card text-white" style="width: 200px; height: 200px; background-color: #5199c2; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-						                <img th:src="@{/images/userIcon.png}" alt="Logo 3" style="width: 80px; height: 80px;">
-						                <div class="fw-bold fs-3 text-dark">19</div> <!-- Text under the image -->
+						                <img th:src="@{/images/inactiveUserIcon.png}" alt="Logo 3" style="width: 80px; height: 80px;">
+						                <div class="fw-bold fs-3 text-dark" th:text="${totalInactiveUser}"></div> <!-- Text under the image -->
 						            </div>
-						            <div class="fw-bold fs-4 mt-3">New Users</div>
+						            <div class="fw-bold fs-4 mt-3">Inactive Users <br> (>1 month)</div>
 						        </div>
 						    </div>
 						</div>
@@ -328,7 +297,7 @@
 
 <script>
 	    // JavaScript to dynamically populate the number and current date
-	    const activeUsers = 97; // Replace this with your dynamic variable
+	    //const activeUsers = 97; // Replace this with your dynamic variable
 	    const currentDate = new Date().toLocaleDateString(); // Format: MM/DD/YYYY or as per locale
 	
 	    document.getElementById('active-users-count').textContent = activeUsers;

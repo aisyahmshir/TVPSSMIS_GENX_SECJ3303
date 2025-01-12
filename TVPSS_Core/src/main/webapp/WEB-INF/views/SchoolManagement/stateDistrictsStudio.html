@@ -121,15 +121,6 @@ width:100% !important;
             <main class="flex-1 p-4 overflow-auto">
                 <h1 class="text-3xl font-bold text-left">View Studio Level and Equipments List</h1>
                 <hr class="my-4 border-t-2 border-gray-800">
-                
-                <div class="mb-4">
-			        <label for="districtSelect">Select District</label>
-			        <select id="districtSelect" class="form-control">
-			            <option value="">All Districts</option>
-			            <!-- Loop through the districts list to populate the dropdown -->
-			            <option th:each="district : ${districts}" th:value="${district.districtName}" th:text="${district.districtName}"></option>
-			        </select>
-			    </div>
 			    
                 <!-- DataTable -->
                 <table id="resultTable" class="display" style="width:100%">
@@ -149,7 +140,7 @@ width:100% !important;
 		                    <td th:text="${district.totalSchools}"></td>
 		                    <td>
                                 <a class="btn btn-primary viewMoreBtn" 
-								   th:href="@{/stateManageStudio/{id}(id=${district.dID})}">
+								   th:href="@{/districtSchoolsStudio/{id}(id=${district.districtID})}">
 								  	Select
 								</a>
                             </td>

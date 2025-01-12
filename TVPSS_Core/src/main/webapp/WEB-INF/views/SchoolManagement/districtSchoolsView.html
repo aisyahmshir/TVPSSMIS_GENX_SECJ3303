@@ -139,26 +139,26 @@ width:100% !important;
                             <th>School</th>
 			                <th>Teacher</th>
 			                <th>Address</th>
-			                <th>Postcode</th>
 			                <th>District</th>
+			                <th>Studio Level</th>
 			                <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr th:each="schools : ${schoolsList}">
-                            <td th:text="${schools.schoolName}"></td>
-			                <td th:text="${schools.teacherInCharge}"></td>
-			                <td th:text="${schools.schoolAddress}"></td>
-			                <td th:text="${schools.postcode}"></td>
-			                <td th:text="${schools.district}"></td>
-                            <td>
-                                <a class="btn btn-primary viewMoreBtn" 
-								   th:href="@{/districtSchoolDetail/{id}(id=${schools.id})}">
-								   View More
-								</a>
-                            </td>
-                        </tr>
-                    </tbody>
+						<tbody>
+						    <tr th:each="school, iterStat : ${schoolsList}">
+						        <td th:text="${school.name}"></td>
+						        <td th:text="${teacherNames[iterStat.index]}"></td> <!-- Access teacher name dynamically -->
+						        <td th:text="${school.fullAddress}"></td>
+						        <td th:text="${districtNames[iterStat.index]}"></td> <!-- Access district name dynamically -->
+						        <td th:text="${studioLevels[iterStat.index]}"></td> <!-- Access studio level dynamically -->
+						        <td>
+						            <a class="btn btn-primary viewMoreBtn" 
+						               th:href="@{/schoolDetail/{id}(id=${school.schoolID})}">
+						               View More
+						            </a>
+						        </td>
+						    </tr>
+						</tbody>
                 </table>
 
 			</main>

@@ -164,10 +164,10 @@ display:inline !important;
                             <th:block th:each="school : ${district.schools}">
                                 <tr>
                                     <td th:text="${school.name}"></td>
-                                    <td th:text="${school.address}"></td>
+                                    <td th:text="${school.districtName}"></td>
                                     <td>
                                         <a class="btn btn-primary viewMoreBtn" 
-                                           th:href="@{/StateContentViewMore/{id}(id=${school.id})}">
+                                           th:href="@{/StateContentViewMore/{id}(id=${school.schoolID})}">
                                            View More
                                         </a>
                                     </td>

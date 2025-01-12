@@ -90,15 +90,15 @@
 				        </tr>
 				    </thead>
 					<tbody>
-					    <tr th:each="content : ${schoolData.contents}">
+					    <tr th:each="content : ${contents}">
 					        <td th:text="${content.title}"></td>
-					        <td th:text="${content.dateCreated}"></td>
-					        <td th:text="${content.youtubeUrl}"></td>
+					        <td th:text="${content.date}"></td>
+					        <td th:text="${content.videoURL}"></td>
 					        <td>
 					           
 					            <button class="btn btn-primary view-btn" 
 					            		th:data-title="${content.title}" 
-					            		th:data-date="${content.dateCreated}" 
+					            		th:data-date="${content.date}" 
 					            		th:data-name="${content.eventName}"
 					            		th:data-details="${content.details}">
 					            	View More

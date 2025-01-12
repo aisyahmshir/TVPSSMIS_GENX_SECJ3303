@@ -2,18 +2,46 @@ package com.tvpss.model;
 
 public class School {
 
-    private Long schoolID;
+
+
+	private int schoolID;
     private String name;
+    private UserModel teacher;
     private String state;
     private String fullAddress;
     private String contactNo;
     private String versionImageURL;
     private byte[] logo; // For BLOB data
-    private byte[] schoolPic; // For BLOB data
-    private Long districtID;
+    private int districtID;
 	private int tvpssVersion;
+	private int studioID;
+	
+	public School() {}
+    public School(String name, String fullAddress, String state, int districtID, String contactNo, String versionImageURL) {
+        this.name = name;
+        this.fullAddress = fullAddress;
+        this.state = state;
+        this.districtID = districtID;
+        this.contactNo = contactNo;
+        this.versionImageURL = versionImageURL;
+    }
 	
 	
+	
+    public School(int schoolID, String name, UserModel teacher, String state, String fullAddress, String contactNo,
+			String versionImageURL, int districtID, int tvpssVersion, int studioID) {
+		super();
+		this.schoolID = schoolID;
+		this.name = name;
+		this.teacher = teacher;
+		this.state = state;
+		this.fullAddress = fullAddress;
+		this.contactNo = contactNo;
+		this.versionImageURL = versionImageURL;
+		this.districtID = districtID;
+		this.tvpssVersion = tvpssVersion;
+		this.studioID = studioID;
+	}
 	
     public int getTvpssVersion() {
 		return tvpssVersion;
@@ -26,11 +54,11 @@ public class School {
 
 
     // Getters and Setters
-    public Long getSchoolID() {
+    public int getSchoolID() {
         return schoolID;
     }
 
-    public void setSchoolID(Long schoolID) {
+    public void setSchoolID(int schoolID) {
         this.schoolID = schoolID;
     }
 
@@ -42,6 +70,14 @@ public class School {
         this.name = name;
     }
 
+    public UserModel getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(UserModel setTeacher) {
+        this.teacher = teacher;
+    }
+    
     public String getState() {
         return state;
     }
@@ -74,30 +110,22 @@ public class School {
         this.versionImageURL = versionImageURL;
     }
 
-    public byte[] getLogo() {
-        return logo;
-    }
-
-    public void setLogo(byte[] logo) {
-        this.logo = logo;
-    }
-
-    public byte[] getSchoolPic() {
-        return schoolPic;
-    }
-
-    public void setSchoolPic(byte[] schoolPic) {
-        this.schoolPic = schoolPic;
-    }
-
-    public Long getDistrictID() {
+    public int getDistrictID() {
         return districtID;
     }
 
-    public void setDistrictID(Long districtID) {
+    public void setDistrictID(int districtID) {
         this.districtID = districtID;
     }
 
+    public int getStudioID() {
+        return studioID;
+    }
+
+    public void setStudioID(int studioID) {
+        this.studioID = studioID;
+    }
+    
     @Override
     public String toString() {
         return "School{" +

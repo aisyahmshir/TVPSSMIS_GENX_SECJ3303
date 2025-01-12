@@ -117,97 +117,96 @@ width:100% !important;
 		<div th:include="header.html"></div>
 
             <!-- Content Section -->
-            <main class="flex-1 p-4 overflow-auto">
-            	
-                <h1 class="text-3xl font-bold text-left">View Studio Level and Equipments List</h1>
-                <hr class="my-4 border-t-2 border-gray-800">
+			<main class="flex-1 p-4 overflow-auto">
+			    <h1 class="text-3xl font-bold text-left">View Studio Level and Equipment List</h1>
+			    <hr class="my-4 border-t-2 border-gray-800">
 				<div class="flex justify-end mb-4">
-			    <button 
-			        onclick="history.back()" 
-			        class="mb-1 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
-			        <i class="fas fa-arrow-left mr-2"></i> Back
-			    </button>
-                </div>
-                <!-- School Information -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <div class="flex justify-between">
-                        <div>
-                            <h2 class="text-xl font-semibold">School Name: <span th:text="${schoolDetail.schoolName}"></span></h2>
-                            <p class="text-lg font-medium">District: <span th:text="${schoolDetail.district}"></span></p>
-                            <p class="text-lg font-medium">Teacher In-Charge: <span th:text="${schoolDetail.teacherInCharge}"></span></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Studio Level & Equipment -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold">Studio Level: <span th:text="${schoolDetail.studioLevel}"></span></h2>
-                        <button th:if="${hasPendingApproval}" data-bs-toggle="modal" data-bs-target="#confirmationModal" 
-				            class="bg-red-500 text-white font-medium text-sm py-1 px-3 rounded ml-2 hover:bg-red-600 transition-all" onclick="approveEquipment('equipmentId')">
-				            Upgrade Request Pending!
-				        </button>
-                    </div>
-
-                    <table class="table table-bordered w-full text-sm">
-                        <thead>
-                            <tr class="bg-gray-200">
-                                <th>Equipment</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="equipmentList : ${equipmentList}">
-                                <td th:text="${equipmentList.name}"></td>
-                                <td class="text-center">
-                                    <span th:if="${equipmentList.status == 'Yes'}" class="text-green-500">Yes</span>
-                                    <span th:if="${equipmentList.status == 'No'}" class="text-red-500">No</span>
-                                    <span th:if="${equipmentList.status == 'New'}" class="text-blue-500">New</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <!-- Equipment Images Link -->
-                    <div class="mt-4">
-                        <p>Equipment images: <a href="${schoolDetail.equipmentImages}" class="text-blue-500 underline" target="_blank">Click here to view images</a></p>
-                    </div>
-                </div>
-            </main>
+				    <button 
+				        onclick="history.back()" 
+				        class="mb-1 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-700 focus:outline-none">
+				        <i class="fas fa-arrow-left mr-2"></i> Back
+				    </button>
+				</div>
+			
+			    <!-- School Information -->
+			    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+			        <div class="flex justify-between">
+			            <div>
+			            	<h2 class="text-xl font-semibold">School Name: <span th:text="${schoolDetail.name}"></span></h2>
+			                <h2 class="text-xl font-semibold">Studio Level: <span th:text="${studioLevel}"></span></h2>
+			                <p class="text-lg font-medium">Equipment Images: <a th:href="@{${imagesLink}}" class="text-blue-500 underline" target="_blank">Click here to view images</a></p>
+			            </div>
+			        </div>
+			    </div>
+			
+			    <!-- Equipment List -->
+			    <div class="bg-white rounded-lg shadow-lg p-6">
+				<div class="flex justify-between items-center mb-4">
+				    <h2 class="text-xl font-semibold">Equipment List</h2>
+				    
+				    <!-- Conditional button for upgrade approval -->
+				    <button th:if="${studioLevelStatus == 'Pending'}" 
+				            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none" 
+				            data-bs-toggle="modal" 
+				            data-bs-target="#confirmationModal">
+				        Upgrade Studio Pending
+				    </button>
+				</div>
+	 				<table class="table table-bordered w-full text-sm">
+			            <thead>
+			                <tr class="bg-gray-200">
+			                    <th>Equipment</th>
+			                    <th>Status</th>
+			                </tr>
+			            </thead>
+			            <tbody>
+			                <tr th:each="equipment : ${equipmentList}">
+			                    <td th:text="${equipment[0]}"></td>
+			                    <td class="text-center">
+			                        <span th:if="${equipment[1] == 'Yes'}" class="text-green-500">Yes</span>
+			                        <span th:if="${equipment[1] == 'No'}" class="text-red-500">No</span>
+			                        <span th:if="${equipment[1] == 'New'}" class="text-blue-500">New</span>
+			                    </td>
+			                </tr>
+			            </tbody>
+			        </table>
+			    </div>
+			</main>
             <footer class="bg-blue-900 text-white text-center py-4">
           	<p>Ministry of Education | TVPSS Application Portal</p>
         	</footer>
         </div>
     </div>
     
-	<!-- Confirmation Modal -->
-	<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-	    <div class="modal-dialog">
-	        <div class="modal-content border border-gray-300 rounded-lg shadow-lg">
-	            <!-- Modal Header -->
-	            <div class="modal-header bg-blue-600 text-white border-b-4 border-purple-500">
-	                <h5 class="modal-title font-bold" id="confirmationModalLabel">Upgrade Request</h5>
-	                <button type="button" class="btn-close bg-red-500 hover:bg-red-600 text-white p-2 rounded-full" 
-	                        data-bs-dismiss="modal" aria-label="Close">
-	                </button>
-	            </div>
-	
-	            <!-- Modal Body -->
-	            <div class="modal-body text-center py-4">
-	                <p class="text-lg font-medium">Accept studio level upgrade request?</p>
-	            </div>
-	
-	            <!-- Modal Footer -->
-	            <div class="modal-footer justify-center">
-	               <a th:href="@{/declined/{id}(id=${schoolDetail.id})}" 
-					   class="btn btn-danger px-4 py-2 rounded">Decline</a>
-					<a th:href="@{/approved/{id}(id=${schoolDetail.id})}" 
-					   class="btn btn-success px-4 py-2 rounded">Accept</a>
+	    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border border-gray-300 rounded-lg shadow-lg">
+                <!-- Modal Header -->
+                <div class="modal-header bg-blue-600 text-white border-b-4 border-purple-500">
+                    <h5 class="modal-title font-bold" id="confirmationModalLabel">Upgrade Request</h5>
+                    <button type="button" class="btn-close bg-red-500 hover:bg-red-600 text-white p-2 rounded-full" 
+                            data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
 
-	            </div>
-	        </div>
-	    </div>
-	</div>
+                <!-- Modal Body -->
+                <div class="modal-body text-center py-4">
+                    <p class="text-lg font-medium">Accept studio level upgrade request?</p>
+                </div>
+
+				<div class="modal-footer justify-center">
+				    <form th:action="@{/rejected/{id}(id=${schoolDetail.schoolID})}" method="POST">
+				        <button type="submit" class="btn btn-danger px-4 py-2 rounded">Decline</button>
+				    </form>
+				    <form th:action="@{/approved/{id}(id=${schoolDetail.schoolID})}" method="POST">
+				        <button type="submit" class="btn btn-success px-4 py-2 rounded">Accept</button>
+				    </form>
+				</div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Sidebar Toggle Script -->
     <script>

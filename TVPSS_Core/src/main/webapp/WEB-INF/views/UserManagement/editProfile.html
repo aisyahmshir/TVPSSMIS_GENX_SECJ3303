@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 900px;
+        }
+        h2 {
+            color: #000000;
+            text-align: center;
+            font-size: 29px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;  /* Adjust spacing between fields */
+        }
+        .form-group label {
+            color: #5D6D7E;
+            font-size: 18px;  /* Increased font size for labels */
+        }
+        .form-control {
+            font-size: 18px;  /* Increased font size for input fields */
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+            font-size: 20px;  /* Increased font size for button text */
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            border-color: #95a5a6;
+        }
+        .alert-success { 
+            background-color: #d4edda; 
+            border-color: #c3e6cb; 
+            color: #155724; 
+            font-size: 25px;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            font-size: 25px;
+        }
+        .btn-primary:hover, .btn-secondary:hover {
+            opacity: 0.9;
+        }
+
+        /* Make the form appear in two columns */
+        .form-row {
+            display: flex; 
+            flex-wrap: wrap; 
+            margin-right: -15px; 
+            margin-left: -15px; 
+        }
+        .form-group.col-md-6 { 
+            flex: 0 0 50%; 
+            padding-right: 15px; 
+            padding-left: 15px; 
+        }
+
+        /* Center the button */
+        .form-row.justify-content-center {
+            justify-content: center;
+        }
+        
+        .alert-success, .alert-danger {
+            font-size: 25px;
+        }
+        .change-password-form {
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>My Profile</h2>
+        
+        <div th:if="${success}" class="alert alert-success mb-4"> 
+            <p th:text="${success}"></p> 
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger mb-4">
+            <p th:text="${error}"></p>
+        </div>
+
+        <form th:action="@{/UserManagement/editProfile/{userID}(userID=${user.userID})}" method="post">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="userID">User ID</label>
+                    <input type="text" id="userID" name="userID" class="form-control" th:value="${user.userID}" disabled>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="role">Role</label>
+                    <input type="text" id="role" name="role" class="form-control" th:value="${user.role}" disabled>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="status">Status</label>
+                    <input type="text" id="status" name="status" class="form-control" th:value="${user.status}" disabled>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" class="form-control" th:value="${user.name}" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="contactNo">Contact Number</label>
+                    <input type="text" id="contactNo" name="contactNo" class="form-control" th:value="${user.contactNo}" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" th:value="${user.email}" required>
+                </div>
+            </div>
+            
+            <div class="form-row justify-content-center">
+	            <div class="form-group col-md-12 text-center">
+	                <button type="button" class="btn btn-secondary" onclick="toggleChangePasswordForm()">Change Password</button>
+	            </div>
+	        </div>
+
+            <div class="form-row justify-content-center"> 
+                <div class="form-group col-md-12 text-center">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    <!-- Change Password Form -->
+    <div class="change-password-form" id="changePasswordForm">
+            <h2 class="text-center" style="font-size: 30px;">Change Password</h2>
+            <form th:action="@{/UserManagement/changePassword}" method="post">
+                <!-- Hidden input for userID -->
+                <input type="hidden" name="userID" th:value="${user.userID}">
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" name="newPassword" class="form-control" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,}$" title="Password must be at least 7 characters long and include at least one letter, one number, and one special character (e.g. @$!%*?&)." required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,}$" title="Password must be at least 7 characters long and include at least one letter, one number, and one special character (e.g. @$!%*?&)." required>
+                    </div>
+                </div>
+
+                <div class="form-row justify-content-center">
+                    <div class="form-group col-md-12 text-center">
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="form-row justify-content-center">
+			    <div class="form-group col-md-12 text-center">
+			        <form th:action="@{/UserManagement/logout}" method="post">
+			            <button type="submit" class="btn btn-primary">Logout</button>
+			        </form>
+			    </div>
+			</div>
+
+        </div>
+    </div>
+
+<script>
+    function toggleChangePasswordForm() {
+        const form = document.getElementById('changePasswordForm');
+        form.style.display = form.style.display === 'none' || form.style.display === '' ? 'block' : 'none';
+    }
+</script>
+    
+    
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

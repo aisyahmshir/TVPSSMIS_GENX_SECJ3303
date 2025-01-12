@@ -15,7 +15,7 @@
     <mvc:annotation-driven />
 
     <!-- Scan for controllers, services, etc. in the specified package -->
-    <context:component-scan base-package="com.tvpss.controller" />
+    <context:component-scan base-package="com.tvpss.controller, com.tvpss.service" />
 
     <!-- Configure Thymeleaf Template Resolver -->
     <bean id="templateResolver" class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
@@ -41,5 +41,8 @@
 
     <!-- Static resource handling (for serving CSS, JS, images) -->
 	<mvc:resources mapping="/images/**" location="/WEB-INF/images/" />
+	
+	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+	
 
 </beans>

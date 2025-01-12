@@ -69,10 +69,10 @@
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow-md">
                 <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold">Studio Level: <span th:text="${schoolDetail.studioLevel}"></span></h2>
+                        <h2 class="text-xl font-semibold">Studio Level: <span th:text="${studioLevel}"></span></h2>
                 </div>
                 
-                <!-- Table Section -->
+				<form th:action="@{/save/{schoolId}(schoolId=${schoolDetail.schoolID})}" method="POST">
                 <table class="table-auto border-collapse w-full text-left">
                     <thead class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                         <tr>
@@ -80,41 +80,39 @@
                             <th class="border px-4 py-2">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Dynamic rows for equipment list -->
-                        <tr th:each="equipment : ${equipmentList}" class="hover:bg-gray-100">
-                            <td class="border px-4 py-2 text-gray-700" th:text="${equipment.name}"></td>
-                            <td class="border px-4 py-2 text-gray-700">
-                                <select class="form-select border rounded px-3 py-1 text-gray-600 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" th:name="${equipment.name}">
-                                    <option th:selected="${equipment.status == 'Yes'}">Yes</option>
-                                    <option th:selected="${equipment.status == 'No'}">No</option>
-                                    <option th:selected="${equipment.status == 'New'}">New</option>
-                                    
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
+					<tbody>
+					    <!-- Dynamic rows for equipment list -->
+					    <tr th:each="equipment : ${equipmentList}" class="hover:bg-gray-100">
+					        <td class="border px-4 py-2 text-gray-700" th:text="${equipment[0]}"></td>
+					        <td class="border px-4 py-2 text-gray-700">
+					            <select class="form-select border rounded px-3 py-1 text-gray-600 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" th:name="${equipment[0]}">
+					                <option th:value="'Yes'" th:selected="${equipment[1] == 'Yes'}">Yes</option>
+					                <option th:value="'No'" th:selected="${equipment[1] == 'No'}">No</option>
+					                <option th:value="'New'" th:selected="${equipment[1] == 'New'}">New</option>
+					            </select>
+					        </td>
+					    </tr>
+					</tbody>
                 </table>
 
-                <form id="googleDriveForm" class="space-y-4">
                 <br>
                 <div class="flex flex-col">
-                    <label for="driveLink" class="text-gray-600 font-medium">Equipment images:</label>
-                    <input 
-                        id="equipImageLink" 
-                        name="equipImageLink" 
-                        class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-						th:value="${schoolDetail.equipmentImages}"
-                        required/>
+                    <label for="imagesLink" class="text-gray-600 font-medium">Equipment Images:</label>
+			        <input 
+			            id="imagesLink" 
+			            name="imagesLink" 
+			            type="text"
+			            class="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+			            th:value="${imagesLink}" 
+			            required />
+            	</div>
+            	                <!-- Button Section -->
+               <div class="flex justify-end mt-6 space-x-4">
+				        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+				            Save
+				        </button>
                 </div>
-            	</form>
-                
-                <!-- Button Section -->
-                <div class="flex justify-end mt-6 space-x-4">
-                    <a th:href="@{/manageStudioEquipment/{id}(id=${schoolDetail.id})}" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Save
-                    </a>
-                </div>
+                </form>
             </div>
         </main>
         <footer class="bg-blue-900 text-white text-center py-4">

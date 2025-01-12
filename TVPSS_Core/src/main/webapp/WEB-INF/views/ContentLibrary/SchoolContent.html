@@ -65,61 +65,67 @@
 
         <!-- Main Content -->
 <div id="contentWrapper" class="flex-1 flex flex-col transition-all">
+    <!-- Header -->
+    <div th:include="header.html"></div>
 
-            <!-- Header -->
-		<div th:include="header.html"></div>
-
-            <!-- Content Section -->
-            <main class="flex-1 p-4 overflow-auto">
-                <h1 class="text-3xl font-bold text-left">Content Library</h1>
-                <hr class="my-4 border-t-2 border-gray-800">
-				<div class="flex justify-end mb-4">
-				    <button class="btn btn-primary add-btn">Add New Content</button>
-				</div>
-                <!-- DataTable -->
-				<table id="resultTable" class="display" style="width:100%">
-				    <thead>
-				        <tr class="bg-blue-500 text-white">
-				            <th>Content Title</th>
-				            <th>Date Created</th>
-				            <th>YouTube Video URL</th>
-				            <th>Action</th>
-				        </tr>
-				    </thead>
-					<tbody>
-					    <tr th:each="content : ${contents}">
-					        <td th:text="${content.title}"></td>
-					        <td th:text="${content.dateCreated}"></td>
-					        <td th:text="${content.youtubeUrl}"></td>
-					        <td>
-					           
-					            <button class="btn btn-primary view-btn" 
-					            		th:data-title="${content.title}" 
-					            		th:data-date="${content.dateCreated}" 
-					            		th:data-name="${content.eventName}"
-					            		th:data-details="${content.details}">
-					            	View More
-					            </button>
-					        </td>
-					    </tr>
-					</tbody>
-				</table>
-
-            </main>
-
-            <!-- Footer -->
-            <footer class="bg-blue-900 text-white text-center py-4">
-                <p>Ministry of Education | TVPSS Application Portal</p>
-            </footer>
+    <!-- Content Section -->
+    <main class="flex-1 p-4 overflow-auto">
+        <h1 class="text-3xl font-bold text-left">Content Library</h1>
+        <hr class="my-4 border-t-2 border-gray-800">
+        <div class="flex justify-end mb-4">
+            <button class="btn btn-primary add-btn">Add New Content</button>
         </div>
+        <!-- DataTable -->
+        <table id="resultTable" class="display" style="width:100%">
+            <thead>
+                <tr class="bg-blue-500 text-white">
+                    <th>Content Title</th>
+                    <th>Date Created</th>
+                    <th>YouTube Video URL</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="content : ${contents}">
+                    <td th:text="${content.title}"></td>
+                    <td th:text="${content.date}"></td>
+                    <td th:text="${content.videoURL}"></td>
+                    <td>
+                        <button class="btn btn-primary view-btn" 
+                                th:data-title="${content.title}" 
+                                th:data-date="${content.date}" 
+                                th:data-name="${content.eventName}"
+                                th:data-details="${content.details}">
+                            View More
+                        </button>
+                        
+                        <!-- Edit Button -->
+                        <button class="btn btn-secondary edit-btn"
+                                th:data-contentID="${content.contentID}" 
+                                th:data-title="${content.title}" 
+                                th:data-date="${content.date}"
+                                th:data-videoURL="${content.videoURL}"
+                                th:data-eventName="${content.eventName}" 
+                                th:data-details="${content.details}">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-blue-900 text-white text-center py-4">
+        <p>Ministry of Education | TVPSS Application Portal</p>
+    </footer>
+</div>
         <!-- Modal -->
 
-        
-        
+<!-- Modal for Viewing Content -->
 <div id="uploadModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 hidden">
     <div class="flex justify-center items-center h-full">
         <div class="bg-white p-6 rounded-lg w-1/3 relative">
-            <!-- Modal Title with Close Button -->
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold">YouTube Link Information</h2>
                 <button id="closeUploadModal" class="text-gray-500 hover:text-gray-700">
@@ -128,7 +134,6 @@
                     </svg>
                 </button>
             </div>
-            <!-- Modal Content -->
             <div id="uploadForm">
                 <label class="block text-lg mb-2">Title</label>
                 <p id="title" class="w-full p-2 border border-gray-300 rounded mb-4 bg-gray-100"></p>
@@ -146,11 +151,10 @@
     </div>
 </div>
 
-
+<!-- Modal for Adding New Content -->
 <div id="addModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 hidden">
     <div class="flex justify-center items-center h-full">
         <div class="bg-white p-6 rounded-lg w-1/3 relative">
-            <!-- Modal Title with Close Button -->
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold">Add New Content</h2>
                 <button id="closeAddModal" class="text-gray-500 hover:text-gray-700">
@@ -159,29 +163,22 @@
                     </svg>
                 </button>
             </div>
-            <!-- Modal Content -->
-            <form id="addForm">
-            
-            	<label for="title" class="block text-lg mb-2">Title</label>
-                <span id="errorLabel" class="text-red-500 text-sm hidden">Please enter a valid title.</span>
-                <textarea id="title" name="driveLink" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the content title here"></textarea>
+
+            <form id="addForm" method="POST" th:action="@{/addContent}" >
+                <label for="title" class="block text-lg mb-2">Content Title</label>
+                <textarea id="title" name="title" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the content title here"></textarea>
                 
                 <label for="date" class="block text-lg mb-2">Date</label>
-                <span id="errorLabel" class="text-red-500 text-sm hidden">Please enter a valid date.</span>
-                <textarea id="date" name="driveLink" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the date here"></textarea>
+                <textarea id="date" name="date" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the date here"></textarea>
                 
-				<label for="eventName" class="block text-lg mb-2">Event Name</label>
-                <span id="errorLabel" class="text-red-500 text-sm hidden">Please enter a valid event name.</span>
-                <textarea id="eventName" name="driveLink" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the event name here"></textarea>
+                <label for="eventName" class="block text-lg mb-2">Event Name</label>
+                <textarea id="eventName" name="eventName" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the event name here"></textarea>
                 
                 <label for="details" class="block text-lg mb-2">Details</label>
-                <span id="errorLabel" class="text-red-500 text-sm hidden">Please enter valid details.</span>
-                <textarea id="details" name="driveLink" rows="4" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the details of the content"></textarea>
+                <textarea id="details" name="details" rows="4" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the details of the content"></textarea>
                 
-                <label for="youtubeLink" class="block text-lg mb-2">YouTube URL Link</label>
-                <span id="errorLabel" class="text-red-500 text-sm hidden">Please enter a valid YouTube URL link.</span>
-                <textarea id="youtubeLink" name="driveLink" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the YouTube URL link here"></textarea>
-
+                <label for="videoURL" class="block text-lg mb-2">YouTube URL</label>
+                <textarea id="videoURL" name="videoURL" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3" placeholder="Enter the YouTube URL here"></textarea>
 
                 <div class="flex justify-end">
                     <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-700">Submit</button>
@@ -190,6 +187,45 @@
         </div>
     </div>
 </div>
+
+<div id="editModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 z-50 hidden">
+    <div class="flex justify-center items-center h-full">
+        <div class="bg-white p-6 rounded-lg w-1/3 relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Edit Content</h2>
+                <button id="closeEditModal" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form id="editForm" method="POST" th:action="@{/editContent}">
+                <input type="hidden" id="contentID" name="contentID">
+
+                <label for="editTitle" class="block text-lg mb-2">Content Title</label>
+                <textarea id="editTitle" name="title" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3"></textarea>
+                
+                <label for="editDate" class="block text-lg mb-2">Date</label>
+                <textarea id="editDate" name="date" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3"></textarea>
+                
+                <label for="editEventName" class="block text-lg mb-2">Event Name</label>
+                <textarea id="editEventName" name="eventName" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3"></textarea>
+                
+                <label for="editDetails" class="block text-lg mb-2">Details</label>
+                <textarea id="editDetails" name="details" rows="4" class="w-full p-2 border border-gray-300 rounded mb-3"></textarea>
+                
+                <label for="editVideoURL" class="block text-lg mb-2">YouTube URL</label>
+                <textarea id="editVideoURL" name="videoURL" rows="1" class="w-full p-2 border border-gray-300 rounded mb-3"></textarea>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-700">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
     </div>
 
     <!-- Sidebar Toggle Script -->
@@ -232,48 +268,78 @@
 	
 	// Open modal
 	viewBtns.forEach(btn => {
-	    btn.addEventListener('click', (event) => {
-	        uploadModal.classList.remove('hidden'); // Show modal
-	        errorLabel.classList.add('hidden'); // Reset error label
-	
-	        // Fetch values from the button's data attributes
-	        const contentTitle = event.target.getAttribute('data-title');
-	        const contentDate = event.target.getAttribute('data-date');
-	        const eventName = event.target.getAttribute('data-name');
-	        const contentDetails = event.target.getAttribute('data-details');
-	
-	        // Populate <p> elements with the fetched data
-	        titleValue.innerText = contentTitle || 'N/A'; 
-	        dateValue.innerText = contentDate || 'N/A'; 
-	        nameValue.innerText = eventName || 'N/A'; 
-	        detailsValue.innerText = contentDetails || 'N/A'; 
-	    });
-	});
+        btn.addEventListener('click', (event) => {
+            uploadModal.classList.remove('hidden');
+            const title = event.target.getAttribute('data-title');
+            const date = event.target.getAttribute('data-date');
+            const eventName = event.target.getAttribute('data-name');
+            const details = event.target.getAttribute('data-details');
 
-    
-    closeUploadModal.addEventListener('click', () => {
-        uploadModal.classList.add('hidden'); // Hide modal
-    });
-    
-    addBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            addModal.classList.remove('hidden'); // Show modal
-            errorLabel.classList.add('hidden'); // Reset error label
-            titleValue.value = ''; // Reset input value
-            dateValue.value = ''; // Reset input value
-            nameValue.value = ''; // Reset input value
-            detailsValue.value = ''; // Reset input value
-            linkValue.value = ''; // Reset input value
+            document.getElementById('title').innerText = title || 'N/A';
+            document.getElementById('date').innerText = date || 'N/A';
+            document.getElementById('eventName').innerText = eventName || 'N/A';
+            document.getElementById('details').innerText = details || 'N/A';
         });
     });
 
-    // Close modal    
-    closeAddModal.addEventListener('click', () => {
-        addModal.classList.add('hidden'); // Hide modal
+    
+	addBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            addModal.classList.remove('hidden');
+        });
     });
 
+    closeAddModal.addEventListener('click', () => {
+        addModal.classList.add('hidden');
+    });
+
+    closeUploadModal.addEventListener('click', () => {
+        uploadModal.classList.add('hidden');
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        const editModal = document.getElementById("editModal");
+        const closeEditModal = document.getElementById("closeEditModal");
+
+        // Open the Edit Modal
+        document.querySelectorAll(".edit-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                const contentID = this.getAttribute("data-contentID");
+                const title = this.getAttribute("data-title");
+                const date = this.getAttribute("data-date");
+                const eventName = this.getAttribute("data-eventName");
+                const details = this.getAttribute("data-details");
+                const videoURL = this.getAttribute("data-videoURL");
+
+                // Populate the modal fields with current values
+                document.getElementById("contentID").value = contentID;
+                document.getElementById("editTitle").value = title;
+                document.getElementById("editDate").value = date;
+                document.getElementById("editEventName").value = eventName;
+                document.getElementById("editDetails").value = details;
+                document.getElementById("editVideoURL").value = videoURL;
+
+                // Show the modal
+                editModal.classList.remove("hidden");
+            });
+        });
+
+        // Close the Edit Modal
+        closeEditModal.addEventListener("click", () => {
+            editModal.classList.add("hidden");
+        });
+
+        // Optional: Close the modal when clicking outside the content area
+        window.addEventListener("click", (event) => {
+            if (event.target === editModal) {
+                editModal.classList.add("hidden");
+            }
+        });
+    });
+
+
     // Form submit handler
-    addForm.addEventListener('submit', () => {
+    /*addForm.addEventListener('submit', () => {
         event.preventDefault(); // Prevent page refresh
         const titleValue = titleValue.value;
         const dateValue = dateValue.value;
@@ -307,7 +373,7 @@
             // Show error message if the field is empty
             errorLabel.classList.remove('hidden');
         }
-    });
+    });*/
 </script>
 
 
