@@ -142,7 +142,8 @@ public class HomeController {
             session.setAttribute("status", user.getStatus());
             System.out.print(user.getDistrictID());
             session.setAttribute("districtID", user.getDistrictID());
-
+            session.setAttribute("schoolID", user.getSchoolID());
+            
             System.out.println("USERID in Controller: " + user.getUserID());
 
             String role = user.getRole();
@@ -158,7 +159,7 @@ public class HomeController {
             } 
             else if ("TEACHER".equalsIgnoreCase(role)) {
                 redirectAttributes.addFlashAttribute("successMessage", "Welcome Teacher!");
-                return "redirect:/addSchool"; // Redirect to User dashboard
+                return "redirect:/teacherSchoolView"; // Redirect to User dashboard
             } 
             else if ("DISTRICT OFFICER".equalsIgnoreCase(role)){
 
@@ -356,7 +357,7 @@ public class HomeController {
         }
 
         // Redirect back to the profile page with a success or error message
-        return "redirect:/UserManagement/editProfile/" + loggedInUserId;
+        return "redirect:/UserManagement/editProfile/";
     }
     
 

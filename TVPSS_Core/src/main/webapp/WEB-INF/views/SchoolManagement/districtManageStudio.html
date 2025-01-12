@@ -74,46 +74,14 @@ width:100% !important;
     <!-- Main Container -->
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="bg-blue-900 text-white w-64 fixed h-full transition-transform transform -translate-x-full z-40">
-            <ul class="space-y-4 p-4">
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="Equipments Icon" class="h-6 w-6 mr-2">
-                        Studio Level
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="Events Icon" class="h-6 w-6 mr-2">
-                        Content Library
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="TVPSS Info & Crew Icon" class="h-6 w-6 mr-2">
-                        TVPSS Version & Crew
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
-                        School
-                    </a>
-                </li>
-            </ul>
-        </aside>
+                <!-- Sidebar -->
+        <div th:include="sideBar.html"></div>
 
         <!-- Overlay -->
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
 
         <!-- Main Content -->
-        <div id="contentWrapper" class="flex-1 flex flex-col transition-all">
+        <div id="contentWrapper" class="flex-1 flex flex-col transition-all ml-64">
             <!-- Header -->
 		<div th:include="header.html"></div>
 

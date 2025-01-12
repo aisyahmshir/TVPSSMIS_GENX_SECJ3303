@@ -45,50 +45,49 @@ public class SchoolController{
 
 	// Display the Add School Form
 	
-	@GetMapping("/addSchool")
-    public String showAddSchoolForm(Model model) {
+    @GetMapping("/addSchool")
+    public String showAddSchoolForm(HttpSession session, Model model) {
+        Integer userId = (Integer) session.getAttribute("id"); 
         model.addAttribute("allDistricts", SchoolService.getAllDistricts()); // Fetch districts for dropdown
+        model.addAttribute("userId", userId); // Add userId to the model for use in the form if needed
         return "SchoolManagement/addSchoolForm"; // Return the name of the HTML template
     }
 
-	@PostMapping("/addSchool")
-	public String addSchool(@RequestParam("name") String name, 
-	                        @RequestParam("fullAddress") String fullAddress, 
-	                        @RequestParam("state") String state, 
-	                        @RequestParam("districtID") String districtIDStr, 
-	                        @RequestParam("contactNo") String contactNo,
-	                        @RequestParam("versionImageURL") String versionImageURL) {
-		int districtID = Integer.parseInt(districtIDStr);
-		
-		School school = new School(name, fullAddress, state, districtID, contactNo, versionImageURL);
+    @PostMapping("/addSchool")
+    public String addSchool(@RequestParam("name") String name, 
+                            @RequestParam("fullAddress") String fullAddress, 
+                            @RequestParam("state") String state, 
+                            @RequestParam("districtID") String districtIDStr, 
+                            @RequestParam("contactNo") String contactNo,
+                            @RequestParam("versionImageURL") String versionImageURL,
+                            HttpSession session
+                            ) { // Add userId as a parameter
+    	Integer userId = (Integer) session.getAttribute("id");
+        int districtID = Integer.parseInt(districtIDStr);
+        
+        School school = new School(name, fullAddress, state, districtID, contactNo, versionImageURL);
 
-	    school.setName(name);
-	    school.setFullAddress(fullAddress);
-	    school.setState(state);
-	    school.setContactNo(contactNo);
-	    school.setVersionImageURL(versionImageURL);
-	    
-	    // Handle districtID conversion
-	    if (districtIDStr != null && !districtIDStr.isEmpty()) {
-	        try {
-	            districtID = Integer.parseInt(districtIDStr);
-	            school.setDistrictID(districtID);
-	        } catch (NumberFormatException e) {
-	            e.printStackTrace(); // Handle invalid district ID
-	            return "redirect:/error"; // Redirect to error page
-	        }
-	    } else {
-	        return "redirect:/error"; // Redirect to error page if districtID is missing
-	    }
+        // Handle districtID conversion
+        if (districtIDStr != null && !districtIDStr.isEmpty()) {
+            try {
+                districtID = Integer.parseInt(districtIDStr);
+                school.setDistrictID(districtID);
+            } catch (NumberFormatException e) {
+                e.printStackTrace(); // Handle invalid district ID
+                return "redirect:/error"; // Redirect to error page
+            }
+        } else {
+            return "redirect:/error"; // Redirect to error page if districtID is missing
+        }
 
-	    // Add the school to the database and retrieve the school object with ID
-	    School addedSchool = SchoolService.addSchool(school);
-	    if (addedSchool != null) {
-	        return "redirect:/teacherSchoolView/" + addedSchool.getSchoolID(); // Redirect to success page
-	    } else {
-	        return "redirect:/error"; // Redirect to error page if adding failed
-	    }
-	}
+        // Add the school to the database and retrieve the school object with ID
+        School addedSchool = SchoolService.addSchool(school, userId); // Pass userId to the service method
+        if (addedSchool != null) {
+            return "redirect:/teacherSchoolView/" + addedSchool.getSchoolID(); // Redirect to success page
+        } else {
+            return "redirect:/error"; // Redirect to error page if adding failed
+        }
+    }
 	
 	@GetMapping("/editSchool/{schoolId}")
 	public String showEditSchoolForm(@PathVariable int schoolId, Model model) {
@@ -157,8 +156,9 @@ public class SchoolController{
 	    }
 	}
 	
-	@GetMapping("/teacherSchoolView/{schoolId}")
-	public String manageSchoolInfo(@PathVariable int schoolId, Model model) {
+	@GetMapping("/teacherSchoolView")
+	public String manageSchoolInfo(HttpSession session, Model model) {
+		int schoolId = (int) session.getAttribute("schoolID");
 	    System.out.println("Fetching details for school ID: " + schoolId);
 
 	    // Fetch the school details using the schoolId
@@ -295,10 +295,9 @@ public class SchoolController{
         return "SchoolManagement/stateDistrictsInfoView"; // The name of the HTML/Thymeleaf template
     }
 
-/*EQUIPMENT*/
-    @GetMapping("addEquip/{schoolId}")
-    public String showAddEquipmentForm(@PathVariable int schoolId, Model model) {
-        // Fetch the list of equipment from the database
+    @GetMapping("/addEquip")
+    public String showAddEquipmentForm(HttpSession session, Model model) {
+		int schoolId = (int) session.getAttribute("schoolID");
         List<Map<String, Object>> equipmentList = SchoolService.getAllEquipment();
 
         // Add the equipment list and school ID to the model
@@ -318,6 +317,7 @@ public class SchoolController{
         return "redirect:/manageEquipment/" + schoolId; // Redirect to the manage equipment page
     }
 
+ 
 	@GetMapping("/editEquipment/{schoolId}")
 	public String editEquipment(@PathVariable int schoolId, Model model) {
 	    // Fetch studio and equipment details
@@ -364,8 +364,10 @@ public class SchoolController{
 	        return "redirect:/manageEquipment/" + schoolId; // Redirect to the manage equipment page
 	    }
 
-	@GetMapping("/manageEquipment/{schoolId}")
-	public String manageEquipment(@PathVariable int schoolId, Model model) {
+	@GetMapping("/manageEquipment")
+	public String manageEquipment(HttpSession session, Model model) {
+		int schoolId = (int) session.getAttribute("schoolID");
+		System.out.println("haha "+schoolId);
 	    // Fetch studio and equipment details
 	    Map<String, Object> studioAndEquipmentDetails = SchoolService.getStudioAndEquipmentDetails(schoolId);
 	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);

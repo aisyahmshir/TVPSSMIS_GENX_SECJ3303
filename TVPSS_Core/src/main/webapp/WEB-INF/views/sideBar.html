@@ -3,7 +3,7 @@
 <nav id="sideBar" class="bg-blue-900 text-white w-64 h-full fixed top-0 left-0 shadow-lg">
     <ul class="space-y-4 p-4">
         <li>
-            <h2 class="text-lg font-bold">Navigation</h2>
+            <h2 class="text-lg font-bold">TVPSS CORE</h2>
         </li>
 
         <li th:if="${#session.getAttribute('role') == 'Admin'}">
@@ -27,8 +27,20 @@
             </a>
         </li>
 
-        <li th:if="${#session.getAttribute('role') == 'District Officer' || #session.getAttribute('role') == 'State Officer' || #session.getAttribute('role') == 'Teacher'}">
+        <li th:if="${#session.getAttribute('role') == 'District Officer'}">
             <a th:href="@{/districtSchoolsStudio}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+                <i class="fas fa-cogs h-6 w-6 mr-2"></i>
+                Studio Level & Equipment
+            </a>
+        </li>
+        <li th:if="${#session.getAttribute('role') ==  'State Officer'}">
+            <a th:href="@{/stateDistrictsStudioInfo}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+                <i class="fas fa-cogs h-6 w-6 mr-2"></i>
+                Studio Level & Equipment
+            </a>
+        </li>
+        <li th:if="${#session.getAttribute('role') == 'Teacher'}">
+            <a th:href="@{/addEquip}" class="flex items-center p-2 hover:bg-blue-700 rounded">
                 <i class="fas fa-cogs h-6 w-6 mr-2"></i>
                 Studio Level & Equipment
             </a>
@@ -55,9 +67,45 @@
             </a>
         </li>
 
-        <li th:if="${#session.getAttribute('role') == 'District Officer' || #session.getAttribute('role') == 'State Officer' || #session.getAttribute('role') == 'Teacher'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+        <li th:if="${#session.getAttribute('role') == 'District Officer'}">
+            <a th:href="@{/districtMainView}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+                <i class="fas fa-user-group h-6 w-6 mr-2"></i>
+                TVPSS Version & Crew
+            </a>
+        </li>
+
+        <li th:if="${#session.getAttribute('role') == 'State Officer'}">
+            <a th:href="@{/stateMainView}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+                <i class="fas fa-user-group h-6 w-6 mr-2"></i>
+                TVPSS Version & Crew
+            </a>
+        </li>
+
+        <li th:if="${#session.getAttribute('role') == 'Teacher'}">
+            <a th:href="@{/teacherMainView}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+                <i class="fas fa-user-group h-6 w-6 mr-2"></i>
+                TVPSS Version & Crew
+            </a>
+        </li>
+        
+        <li th:if="${#session.getAttribute('role') == 'District Officer'}">
+            <a th:href="@{/districtSchoolsView}" class="flex items-center p-2 hover:bg-blue-700 rounded">
                 <i class="fas fa-school h-6 w-6 mr-2"></i>
+                School Information
+            </a>
+        </li>
+        
+
+        <li th:if="${#session.getAttribute('role') == 'State Officer'}">
+            <a th:href="@{/stateDistrictsInfo}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+ <i class="fas fa-school h-6 w-6 mr-2"></i>
+                School Information
+            </a>
+        </li>
+
+        <li th:if="${#session.getAttribute('role') == 'Teacher'}">
+            <a th:href="@{/SchoolContent}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+ <i class="fas fa-school h-6 w-6 mr-2"></i>
                 School Information
             </a>
         </li>

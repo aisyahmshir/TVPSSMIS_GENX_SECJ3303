@@ -467,7 +467,6 @@ public class CrewService {
                 "s.fullAddress, " +
                 "s.contactNo AS schoolContactNo, " +
                 "s.versionImageURL, " +
-                "s.logo, " +
                 "s.districtID AS schoolDistrictID, " +
                 "s.tvpssVersion, " +
                 "u.id AS userID, " +
@@ -656,7 +655,6 @@ public class CrewService {
                 "s.fullAddress, " +
                 "s.contactNo AS schoolContactNo, " +
                 "s.versionImageURL, " +
-                "s.logo, " +
                 "s.districtID AS schoolDistrictID, " +
                 "s.tvpssVersion, " +
                 "u.id AS userID, " +

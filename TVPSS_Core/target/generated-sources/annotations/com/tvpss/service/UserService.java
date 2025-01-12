@@ -140,7 +140,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     public UserModel validateLogin(String email, String password) {
-        String query = "SELECT id, userID, role, districtID, status, password FROM user WHERE email = ?";
+        String query = "SELECT id, userID, role, districtID, schoolID, status, password FROM user WHERE email = ?";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
@@ -161,6 +161,7 @@ public class UserService {
                             user.setUserID(rs.getString("userID"));
                             user.setRole(rs.getString("role"));
                             user.setDistrictID(rs.getInt("districtID"));
+                            user.setSchoolID(rs.getInt("schoolID"));
                             user.setStatus(status);
                             return user; // Return the user details if password is valid and account is approved
                         } else {
@@ -264,6 +265,7 @@ public class UserService {
                 user.setEmail(rs.getString("email"));
                 user.setContactNo(rs.getString("contactNo"));
                 user.setRole(rs.getString("role"));
+                user.setLastActive(rs.getTimestamp("lastActive"));
                 users.add(user);
             }
         } catch (SQLException e) {

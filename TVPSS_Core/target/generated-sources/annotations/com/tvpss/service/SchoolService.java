@@ -44,18 +44,20 @@ public class SchoolService {
         }
     }
     
-    public static School addSchool(School school) {
+    public static School addSchool(School school, int userId) {
         String insertQuery = "INSERT INTO school (name, fullAddress, state, districtID, contactNo, tvpssVersion) VALUES (?, ?, ?, ?, ?, ?)";
+        String updateUserQuery = "UPDATE user SET districtID = ?, schoolID = ? WHERE id = ?"; // Update user with new districtID and schoolID
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
 
+            // Insert the new school
             stmt.setString(1, school.getName());
             stmt.setString(2, school.getFullAddress());
             stmt.setString(3, school.getState());
             stmt.setInt(4, school.getDistrictID());
             stmt.setString(5, school.getContactNo());
-            stmt.setInt(6, 1); // Set tvpssVersion to 0
+            stmt.setInt(6, 1); // Set tvpssVersion to 1
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
@@ -66,6 +68,20 @@ public class SchoolService {
 
                         // Now insert a new studio with the same studioID as schoolID
                         addNewStudio(schoolID); // Call the method to add a new studio
+
+                        // Update the user table with the new districtID and schoolID
+                        try (PreparedStatement updateStmt = conn.prepareStatement(updateUserQuery)) {
+                            updateStmt.setInt(1, school.getDistrictID()); // Set the new districtID
+                            updateStmt.setInt(2, schoolID); // Set the new schoolID
+                            updateStmt.setInt(3, userId); // Set the specific user's ID
+
+                            int updatedRows = updateStmt.executeUpdate();
+                            if (updatedRows > 0) {
+                                System.out.println("User  table updated successfully.");
+                            } else {
+                                System.out.println("No user found with the given ID.");
+                            }
+                        }
                     } else {
                         throw new SQLException("Creating school failed, no ID obtained.");
                     }

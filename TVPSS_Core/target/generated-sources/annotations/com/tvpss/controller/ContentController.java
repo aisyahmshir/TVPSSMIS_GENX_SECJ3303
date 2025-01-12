@@ -586,11 +586,11 @@ public class ContentController {
 	    // Step 4: Add the list of schools to the model
 	    model.addAttribute("schools", schools);
 	    String role = (String) session.getAttribute("role");
-        int id = (Integer) session.getAttribute("id");
+        String userID = (String) session.getAttribute("id");
 
         // Add attributes to the model
         model.addAttribute("role", role);
-        model.addAttribute("id", id);
+        model.addAttribute("userID", userID);
 
 	    // Return the view name to render the district content
 	    return "ContentLibrary/DistrictContent";

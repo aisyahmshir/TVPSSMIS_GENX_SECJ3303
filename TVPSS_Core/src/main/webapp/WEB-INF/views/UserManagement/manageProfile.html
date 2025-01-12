@@ -12,59 +12,20 @@
     
 </head>
 <body class="h-screen bg-gray-100">
+<div class="flex h-screen">
+   <!-- Main Container -->
+		<div th:include="sideBar.html"></div>
 
-    <!-- Main Container -->
-    <div x-data="{ sidebarOpen: false }" class="relative flex flex-col h-screen">
-        
-        <!-- Header -->
-        <div th:include="header.html">
-            <!-- Hamburger Menu Icon -->
-            <button @click="sidebarOpen = !sidebarOpen" class="absolute top-4 left-4 text-white z-50">
-                <i class="fas fa-bars text-2xl"></i>
-            </button>
-        </div>
-
-        <!-- Sidebar -->
-        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed top-0 left-0 z-40 h-full bg-blue-900 text-white w-64 p-4 transform transition-transform duration-300 ease-in-out">
-            <button @click="sidebarOpen = false" class="absolute top-4 right-4 text-white">
-                <i class="fas fa-times"></i>
-            </button>
-            <ul class="space-y-4 mt-8">
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="Dashboard Icon" class="h-6 w-6 mr-2">
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="Equipments Icon" class="h-6 w-6 mr-2">
-                        Studio Level
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="Events Icon" class="h-6 w-6 mr-2">
-                        Content Library
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="TVPSS Info & Crew Icon" class="h-6 w-6 mr-2">
-                        TVPSS Version & Crew
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="flex items-center p-2 rounded hover:bg-blue-700">
-                        <img src="https://via.placeholder.com/24" alt="School Icon" class="h-6 w-6 mr-2">
-                        School
-                    </a>
-                </li>
-            </ul>
-        </aside>
-
-        <!-- Sidebar Overlay -->
-        <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black bg-opacity-50 z-30"></div>
+		<!-- Overlay -->
+		<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+		        <!-- Overlay for smaller screens -->
+		        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+		
+		        <!-- Main Content -->
+		<div id="contentWrapper" class="flex-1 flex flex-col transition-all ml-64">
+		
+		            <!-- Header -->
+				<div th:include="header.html"></div>
 
         <!-- Main Content Wrapper -->
         <div class="flex flex-1">
@@ -121,11 +82,9 @@
 
 
         <!-- Footer -->
-        <footer class="bg-blue-800 text-white p-4">
-            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-center items-center">
-                <p class="text-sm text-center">&copy; 2024 TVPSS CORE. All rights reserved.</p>
-            </div>
-        </footer>
+            <footer class="bg-blue-900 text-white text-center py-4">
+                <p>Ministry of Education | TVPSS Application Portal</p>
+            </footer>
     </div>
 
     <!-- Load Alpine.js -->
