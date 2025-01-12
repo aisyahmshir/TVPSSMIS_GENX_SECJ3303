@@ -32,13 +32,13 @@ public class CrewService {
         }
     }
 
-    public static UserModel getUserDetails(String userID) {
+    public static UserModel getUserDetails(int userID) {
         String query = "SELECT * FROM user WHERE id = ?";
         
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
              
-            stmt.setString(1, userID);
+            stmt.setInt(1, userID);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return new UserModel(
@@ -63,7 +63,7 @@ public class CrewService {
         return null;
     }
 
-    public static List<CrewModel> getCrewDetailsWithTeachers(String userID) {
+    public static List<CrewModel> getCrewDetailsWithTeachers(int userID) {
         List<CrewModel> crewList = new ArrayList<>();
         String query = 
         	    "SELECT " +
@@ -91,7 +91,7 @@ public class CrewService {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setString(1, userID);
+            stmt.setInt(1, userID);
             Map<Integer, CrewModel> crewMap = new HashMap<>();
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -286,7 +286,7 @@ public class CrewService {
     }
 
  // Add the method to get school details by userID
-    public static School getSchoolDetailsByUserID(String userID) {
+    public static School getSchoolDetailsByUserID(int userID) {
         String query = "SELECT s.* FROM school s " +
                        "JOIN user u ON s.schoolID = u.schoolID " +
                        "WHERE u.id = ?";
@@ -294,7 +294,7 @@ public class CrewService {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
              
-            stmt.setString(1, userID);
+            stmt.setInt(1, userID);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     // Construct and return a School object based on the result set

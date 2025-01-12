@@ -1,121 +1,79 @@
-<div id="sideBar" class="bg-blue-900 text-white w-64 h-full fixed top-0 left-0 shadow-lg">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<div th:fragment="sidebar">
+<nav id="sideBar" class="bg-blue-900 text-white w-64 h-full fixed top-0 left-0 shadow-lg">
     <ul class="space-y-4 p-4">
-        <!-- Sidebar Title -->
         <li>
             <h2 class="text-lg font-bold">Navigation</h2>
         </li>
 
-        <!-- Admin Role Links -->
         <li th:if="${#session.getAttribute('role') == 'Admin'}">
             <a th:href="@{/AdminDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="Admin Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-tachometer-alt h-6 w-6 mr-2"></i>
                 Admin Dashboard
             </a>
         </li>
 
-        <!-- District Officer Role Links -->
         <li th:if="${#session.getAttribute('role') == 'District Officer'}">
             <a th:href="@{/DistrictDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="District Officer Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-map-marker-alt h-6 w-6 mr-2"></i>
                 District Dashboard
             </a>
         </li>
 
-        <!-- State Officer Role Links -->
         <li th:if="${#session.getAttribute('role') == 'State Officer'}">
             <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-globe h-6 w-6 mr-2"></i>
                 State Dashboard
             </a>
         </li>
-        
+
+        <li th:if="${#session.getAttribute('role') == 'District Officer' || #session.getAttribute('role') == 'State Officer' || #session.getAttribute('role') == 'Teacher'}">
+            <a th:href="@{/districtSchoolsStudio}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+                <i class="fas fa-cogs h-6 w-6 mr-2"></i>
+                Studio Level & Equipment
+            </a>
+        </li>
+
         <li th:if="${#session.getAttribute('role') == 'District Officer'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
-                Studio Level & Equipment
-            </a>
-        </li>
-        <li th:if="${#session.getAttribute('role') == 'State Officer'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
-                Studio Level & Equipment
-            </a>
-        </li>
-        <li th:if="${#session.getAttribute('role') == 'Teacher'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
-                Studio Level & Equipment
-            </a>
-        </li>
-        
-		<li th:if="${#session.getAttribute('role') == 'District Officer'}">
             <a th:href="@{/DistrictContent}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-book h-6 w-6 mr-2"></i>
                 Content Library
             </a>
         </li>
+
         <li th:if="${#session.getAttribute('role') == 'State Officer'}">
             <a th:href="@{/StateContent}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-book h-6 w-6 mr-2"></i>
                 Content Library
             </a>
         </li>
+
         <li th:if="${#session.getAttribute('role') == 'Teacher'}">
             <a th:href="@{/SchoolContent}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-book h-6 w-6 mr-2"></i>
                 Content Library
             </a>
         </li>
-        
-        <li th:if="${#session.getAttribute('role') == 'District Officer'}">
+
+        <li th:if="${#session.getAttribute('role') == 'District Officer' || #session.getAttribute('role') == 'State Officer' || #session.getAttribute('role') == 'Teacher'}">
             <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
-                TVPSS Version & Crew
-            </a>
-        </li>
-        <li th:if="${#session.getAttribute('role') == 'State Officer'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
-                TVPSS Version & Crew
-            </a>
-        </li>
-        <li th:if="${#session.getAttribute('role') == 'Teacher'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
-                TVPSS Version & Crew
-            </a>
-        </li>
-        
-        <li th:if="${#session.getAttribute('role') == 'District Officer'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-school h-6 w-6 mr-2"></i>
                 School Information
             </a>
         </li>
-        <li th:if="${#session.getAttribute('role') == 'State Officer'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
-                School Information
-            </a>
-        </li>
-        <li th:if="${#session.getAttribute('role') == 'Teacher'}">
-            <a th:href="@{/StateDashboard}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="State Officer Icon" class="h-6 w-6 mr-2">
-                School Information
-            </a>
-        </li>
-        <!-- Common Links -->
+
         <li>
             <a th:href="@{/UserManagement/editProfile}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="Profile Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-user h-6 w-6 mr-2"></i>
                 Profile
             </a>
         </li>
         <li>
             <a th:href="@{/UserManagement/logout}" class="flex items-center p-2 hover:bg-blue-700 rounded">
-                <img src="https://via.placeholder.com/24" alt="Help Icon" class="h-6 w-6 mr-2">
+                <i class="fas fa-sign-out-alt h-6 w-6 mr-2"></i>
                 Logout
             </a>
         </li>
     </ul>
+</nav>
 </div>

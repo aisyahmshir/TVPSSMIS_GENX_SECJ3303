@@ -140,7 +140,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     public UserModel validateLogin(String email, String password) {
-        String query = "SELECT id, userID, role, status, password FROM user WHERE email = ?";
+        String query = "SELECT id, userID, role, districtID, status, password FROM user WHERE email = ?";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
@@ -156,9 +156,11 @@ public class UserService {
                         //If password matches, check if the account is approved
                         if ("Approved".equalsIgnoreCase(status)) {
                             UserModel user = new UserModel();
+                            
                             user.setId(rs.getInt("id"));
                             user.setUserID(rs.getString("userID"));
                             user.setRole(rs.getString("role"));
+                            user.setDistrictID(rs.getInt("districtID"));
                             user.setStatus(status);
                             return user; // Return the user details if password is valid and account is approved
                         } else {

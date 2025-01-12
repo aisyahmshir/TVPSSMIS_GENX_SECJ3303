@@ -89,7 +89,7 @@ public class DashboardService {
         LocalDate currentDate = LocalDate.now();
         LocalDate thirtyDaysAgo = currentDate.minusDays(30);
 
-        String query = "SELECT COUNT(*) AS activeCount FROM user WHERE lastActive <= ?";
+        String query = "SELECT COUNT(*) AS inactiveCount FROM user WHERE lastActive <= ?";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -180,7 +180,7 @@ public class DashboardService {
     public static int getDistrictActiveToday() {
         int districtTodayCount = 0;
 
-        String query = "SELECT COUNT(*) AS teacherTodayCount FROM user WHERE DATE(lastActive) = CURDATE() AND role = 'district'";
+        String query = "SELECT COUNT(*) AS districtTodayCount FROM user WHERE DATE(lastActive) = CURDATE() AND role = 'district'";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {

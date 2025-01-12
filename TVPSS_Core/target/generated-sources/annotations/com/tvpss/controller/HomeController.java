@@ -140,6 +140,9 @@ public class HomeController {
             session.setAttribute("userID", user.getUserID());
             session.setAttribute("role", user.getRole());
             session.setAttribute("status", user.getStatus());
+            System.out.print(user.getDistrictID());
+            session.setAttribute("districtID", user.getDistrictID());
+
             System.out.println("USERID in Controller: " + user.getUserID());
 
             String role = user.getRole();
@@ -150,8 +153,7 @@ public class HomeController {
                 return "redirect:/AdminDashboard"; // Redirect to Admin dashboard
             } 
             else if ("STUDENT".equalsIgnoreCase(role)) {
-                redirectAttributes.addFlashAttribute("successMessage", "Welcome Student!");
-                System.out.println("Role in Controller: " + role);
+            	System.out.println("sup: " + user.getUserID());
                 return "redirect:/studentMainView"; // Redirect to User dashboard
             } 
             else if ("TEACHER".equalsIgnoreCase(role)) {
@@ -159,6 +161,7 @@ public class HomeController {
                 return "redirect:/addSchool"; // Redirect to User dashboard
             } 
             else if ("DISTRICT OFFICER".equalsIgnoreCase(role)){
+
             	redirectAttributes.addFlashAttribute("successMessage", "Welcome District Officer!");
                 return "redirect:/DistrictDashboard"; // Return to login page if role is invalid
             }

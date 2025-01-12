@@ -37,7 +37,7 @@ public class DashboardController {
         model.addAttribute("data", List.of(studentTodayCount, teacherTodayCount, districtTodayCount));
         
         String role = (String) session.getAttribute("role");
-        String userID = (String) session.getAttribute("userID");
+        int userID = (Integer) session.getAttribute("id");
 
         // Add attributes to the model
         model.addAttribute("role", role);

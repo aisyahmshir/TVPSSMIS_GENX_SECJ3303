@@ -403,8 +403,10 @@ public class SchoolController{
 	    return "SchoolManagement/teacherManageEquip"; // Return the view name
 	}
 	
-	@GetMapping("/districtSchoolsStudio/{districtId}")
-	public String viewDistrictSchools(@PathVariable int districtId, Model model) {
+	@GetMapping("/districtSchoolsStudio")
+	public String viewDistrictSchools( Model model,HttpSession session) {
+		int districtId = (int) session.getAttribute("districtID");
+		System.out.println("haha "+districtId);
 	    Map<String, Object> result = SchoolService.getSchoolsStudio(districtId);
 	    
 	    model.addAttribute("schoolDetails", result.get("schoolDetails"));

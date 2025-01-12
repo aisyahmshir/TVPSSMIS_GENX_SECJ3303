@@ -37,11 +37,7 @@ public class CrewController {
 	    System.out.println("I'm in");
 
 	    // Get the userID from the session
-//	    String userID = (String) httpSession.getAttribute("userID");
-	    String userID = "1";
-	    if (userID == null) {
-	        return "redirect:/login"; // Redirect to login if no userID in session
-	    }
+    int userID = (Integer) httpSession.getAttribute("id");
 
 	    // Fetch user details from the service
 	    UserModel user = CrewService.getUserDetails(userID);
@@ -99,15 +95,15 @@ public class CrewController {
     //START OF TEACHER CONTROLLER METHODS
     
     @GetMapping("/teacherMainView")
-    public String teacherHome(Model model) {
+    public String teacherHome(Model model, HttpSession session) {
         System.out.println("I'm in");
 
         String role = "teacher";
         model.addAttribute("role", role);
 
         // Fetch dynamic school data from CrewService
-//	    String userID = (String) httpSession.getAttribute("userID");
-	    String userID = "1";
+	    int userID = (Integer) session.getAttribute("id");
+
 
         School schoolInfo = CrewService.getSchoolDetailsByUserID(userID);
         List<Map<String, Object>> schools = new ArrayList<>();
@@ -151,7 +147,6 @@ public class CrewController {
                                                    RedirectAttributes redirectAttributes) {
     	
         java.sql.Date todayDate = new java.sql.Date(System.currentTimeMillis());
-        int id = 1;
         String status = "Pending";
         System.out.println("id "+schoolID);
         System.out.println("link "+driveLink);
@@ -177,8 +172,7 @@ public class CrewController {
         System.out.println("I'm in");
 
         // Get the userID from the session
-        //Integer userID = (Integer) session.getAttribute("userID");
-        Integer userID = 1;
+        Integer userID = (Integer) session.getAttribute("id");
         if (userID == null) {
             throw new IllegalStateException("User is not logged in.");
         }
@@ -233,8 +227,7 @@ public class CrewController {
         System.out.println("I'm in");
 
         // Get the userID from the session
-        //Integer userID = (Integer) session.getAttribute("userID");
-        Integer userID = 1;
+        Integer userID = (Integer) session.getAttribute("id");
         if (userID == null) {
             throw new IllegalStateException("User is not logged in.");
         }
@@ -253,10 +246,9 @@ public class CrewController {
     }
 
 	 @GetMapping("/districtMainView")
-	 public String districtMainView(Model model) {
+	 public String districtMainView(Model model,HttpSession session) {
 		    // Step 1: Call the service to get schools and users
-	        //Integer userID = (Integer) session.getAttribute("userID");
-	        Integer userID = 1;
+	        Integer userID = (Integer) session.getAttribute("id");
 	        if (userID == null) {
 	            throw new IllegalStateException("User is not logged in.");
 	        }
@@ -339,8 +331,7 @@ public class CrewController {
 			 Model model) {
 	     System.out.println("View school with ID: " + schoolId);
 		 String viewPath = "";
-		 //String role = (String) session.getAttribute("role");
-		 String role = "District";
+		 String role = (String) session.getAttribute("role");
 		 if ("District".equalsIgnoreCase(role)) {
 		        viewPath = "/districtMainView";
 		        System.out.println("view is "+ viewPath);
