@@ -184,6 +184,11 @@ public class HomeController {
  // Method to display the Manage Profile page with all users
     @GetMapping("UserManagement/manageProfile")
     public String manageProfile(Model model, HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("ADMIN".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
     	
 		String loggedInUserId = (String) session.getAttribute("userID");
 		        
@@ -215,7 +220,7 @@ public class HomeController {
         }
 
         // Fetch the updated user list and pass it to the view
-        List<UserModel> users = userService.getAllUsers();
+        List<UserModel> users = userService.getApprovedUsers();
         model.addAttribute("users", users);
         
         return "UserManagement/manageProfile";  // Reload the manageProfile page
@@ -225,6 +230,11 @@ public class HomeController {
  
     @GetMapping("UserManagement/approveUsers")
     public String viewPendingUsers(Model model, HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("ADMIN".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
     	
 		String loggedInUserId = (String) session.getAttribute("userID");
 		        
@@ -312,7 +322,7 @@ public class HomeController {
             return "redirect:/UserManagement/editProfile";
         } else {
         	redirectAttributes.addFlashAttribute("error", "Failed to update details.");
-            return "UserManagement/editProfile/" + userID;
+            return "UserManagement/editProfile";
         }
     }
     

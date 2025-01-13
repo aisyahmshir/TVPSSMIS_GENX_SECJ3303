@@ -34,6 +34,11 @@ import com.tvpss.service.EmailService;
 public class CrewController {
 	@RequestMapping("/studentMainView")
 	public String home(Model model, HttpSession httpSession) {
+		String role = (String) httpSession.getAttribute("role");
+	    
+	    if("STUDENT".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 	    System.out.println("I'm in");
 
 	    // Get the userID from the session
@@ -96,9 +101,13 @@ public class CrewController {
     
     @GetMapping("/teacherMainView")
     public String teacherHome(Model model, HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("TEACHER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
         System.out.println("I'm in");
 
-        String role = "teacher";
         model.addAttribute("role", role);
 
         // Fetch dynamic school data from CrewService
@@ -169,6 +178,11 @@ public class CrewController {
 	
     @GetMapping("/teacherViewApplication")
     public String teacherViewApplication(HttpSession session, Model model) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("TEACHER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
         System.out.println("I'm in");
 
         // Get the userID from the session
@@ -224,6 +238,11 @@ public class CrewController {
     
     @GetMapping("/districtViewApplication")
     public String districtViewApplication(HttpSession session, Model model) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("DISTRICT OFFICER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
         System.out.println("I'm in");
 
         // Get the userID from the session
@@ -247,6 +266,11 @@ public class CrewController {
 
 	 @GetMapping("/districtMainView")
 	 public String districtMainView(Model model,HttpSession session) {
+			String role = (String) session.getAttribute("role");
+		    
+		    if("DISTRICT OFFICER".equalsIgnoreCase(role) == false) {
+		    	return "UserManagement/login"; 
+		    }
 		    // Step 1: Call the service to get schools and users
 	        Integer userID = (Integer) session.getAttribute("id");
 	        if (userID == null) {
@@ -290,7 +314,12 @@ public class CrewController {
 	 
 	 //STATE'S CONTROLLER METHODS
 	 @GetMapping("/stateMainView")
-	 public String getSchoolsAndDistrictDetails(Model model) {
+	 public String getSchoolsAndDistrictDetails(Model model,HttpSession session) {
+			String role = (String) session.getAttribute("role");
+		    
+		    if("STATE OFFICER".equalsIgnoreCase(role) == false) {
+		    	return "UserManagement/login"; 
+		    }
 		    // Step 1: Call the service to get schools and users
 		    Map<String, Object> result = CrewService.getSchoolsAndUsers();
 
@@ -332,10 +361,10 @@ public class CrewController {
 	     System.out.println("View school with ID: " + schoolId);
 		 String viewPath = "";
 		 String role = (String) session.getAttribute("role");
-		 if ("District".equalsIgnoreCase(role)) {
+		 if ("District Officer".equalsIgnoreCase(role)) {
 		        viewPath = "/districtMainView";
 		        System.out.println("view is "+ viewPath);
-		    } else if ("State".equalsIgnoreCase(role)) {
+		    } else if ("State Officer".equalsIgnoreCase(role)) {
 		        viewPath = "/stateMainView";
 		    } 
 	     // Fetch school data using the service method

@@ -50,7 +50,7 @@
 				    <thead>
 				        <tr class="bg-blue-500 text-white">
 				            <th>Content Title</th>
-				            <th>Date Created</th>
+				            
 				            <th>YouTube Video URL</th>
 				            <th>Action</th>
 				        </tr>
@@ -58,7 +58,7 @@
 					<tbody>
 					    <tr th:each="content : ${contents}">
 					        <td th:text="${content.title}"></td>
-					        <td th:text="${content.date}"></td>
+					        
 					        <td th:text="${content.videoURL}"></td>
 					        <td>
 					           
@@ -202,7 +202,7 @@ $(document).ready(function () {
                 type: 'string',
             },
             {
-                targets: [3], // Action column (set to not sortable)
+                targets: [2], // Action column (set to not sortable)
                 orderable: false,
             }
         ],

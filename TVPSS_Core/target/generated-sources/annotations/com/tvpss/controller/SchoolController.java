@@ -47,6 +47,11 @@ public class SchoolController{
 	
     @GetMapping("/addSchool")
     public String showAddSchoolForm(HttpSession session, Model model) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("TEACHER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
         Integer userId = (Integer) session.getAttribute("id"); 
         model.addAttribute("allDistricts", SchoolService.getAllDistricts()); // Fetch districts for dropdown
         model.addAttribute("userId", userId); // Add userId to the model for use in the form if needed
@@ -83,14 +88,19 @@ public class SchoolController{
         // Add the school to the database and retrieve the school object with ID
         School addedSchool = SchoolService.addSchool(school, userId); // Pass userId to the service method
         if (addedSchool != null) {
-            return "redirect:/teacherSchoolView/" + addedSchool.getSchoolID(); // Redirect to success page
+            return "redirect:/teacherSchoolView"; // Redirect to success page
         } else {
             return "redirect:/error"; // Redirect to error page if adding failed
         }
     }
 	
 	@GetMapping("/editSchool/{schoolId}")
-	public String showEditSchoolForm(@PathVariable int schoolId, Model model) {
+	public String showEditSchoolForm(@PathVariable int schoolId, Model model,HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("TEACHER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 	    // Fetch the school details using the schoolId
 	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
 	    
@@ -135,11 +145,11 @@ public class SchoolController{
 	        } catch (NumberFormatException e) {
 	            e.printStackTrace(); // Handle invalid district ID
 	            redirectAttributes.addFlashAttribute("errorMessage", "Invalid district ID.");
-	            return "redirect:/teacherSchoolView/" + schoolId; // Redirect back to the view
+	            return "redirect:/teacherSchoolView"; // Redirect back to the view
 	        }
 	    } else {
 	        redirectAttributes.addFlashAttribute("errorMessage", "District ID is required.");
-	        return "redirect:/teacherSchoolView/" + schoolId; // Redirect back to the view
+	        return "redirect:/teacherSchoolView"; // Redirect back to the view
 	    }
 
 	    school.setContactNo(contactNo);
@@ -149,15 +159,20 @@ public class SchoolController{
 	    boolean isUpdated = SchoolService.editSchool(school);
 	    if (isUpdated) {
 	        redirectAttributes.addFlashAttribute("message", "School updated successfully!");
-	        return "redirect:/teacherSchoolView/" + schoolId; // Redirect to success page
+	        return "redirect:/teacherSchoolView"; // Redirect to success page
 	    } else {
 	        redirectAttributes.addFlashAttribute("errorMessage", "Failed to update school.");
-	        return "redirect:/teacherSchoolView/" + schoolId; // Redirect back to the edit form
+	        return "redirect:/teacherSchoolView"; // Redirect back to the edit form
 	    }
 	}
 	
 	@GetMapping("/teacherSchoolView")
 	public String manageSchoolInfo(HttpSession session, Model model) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("TEACHER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 		int schoolId = (int) session.getAttribute("schoolID");
 	    System.out.println("Fetching details for school ID: " + schoolId);
 
@@ -198,9 +213,15 @@ public class SchoolController{
 	    return "SchoolManagement/teacherSchoolView"; // Return the view name
 	}
 	
-	@GetMapping("/districtSchoolsView/{districtId}")
-	public String districtViewSchools(@PathVariable("districtId") int districtId, Model model, HttpSession session) {
-		
+	@GetMapping("/districtSchoolsView")
+	public String districtViewSchools( Model model, HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+		if (!"DISTRICT OFFICER".equalsIgnoreCase(role) && !"STATE OFFICER".equalsIgnoreCase(role)) {
+		    return "UserManagement/login"; 
+		}
+
+			int districtId = (int) session.getAttribute("districtID");
 	    session.setAttribute("currentDistrictId", districtId);
 	    // Fetch schools for the given district ID
 	    Map<String, Object> result = SchoolService.getSchoolsByDistrictId(districtId);
@@ -250,6 +271,11 @@ public class SchoolController{
 	
 	@GetMapping("/schoolDetail/{schoolId}")
     public String districtViewSchoolDetail(@PathVariable("schoolId") int schoolId, Model model, HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+		if (!"DISTRICT OFFICER".equalsIgnoreCase(role) && !"STATE OFFICER".equalsIgnoreCase(role)) {
+		    return "UserManagement/login"; 
+		}
 	    System.out.println("Fetching details for school ID: " + schoolId);
 
 	    session.setAttribute("currentSchoolId", schoolId);
@@ -288,7 +314,12 @@ public class SchoolController{
     }
 	
 	@GetMapping("/stateDistrictsInfo")
-    public String viewDistrictsInfo(Model model) {
+    public String viewDistrictsInfo(Model model,HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+		if ("STATE OFFICER".equalsIgnoreCase(role) == false) {
+		    return "UserManagement/login"; 
+		}
         List<Map<String, Object>> districts = SchoolService.getDistrictsWithDetails();
         model.addAttribute("districts", districts);
 
@@ -297,6 +328,11 @@ public class SchoolController{
 
     @GetMapping("/addEquip")
     public String showAddEquipmentForm(HttpSession session, Model model) {
+		String role = (String) session.getAttribute("role");
+	    
+		if ("TEACHER".equalsIgnoreCase(role) == false) {
+		    return "UserManagement/login"; 
+		}
 		int schoolId = (int) session.getAttribute("schoolID");
         List<Map<String, Object>> equipmentList = SchoolService.getAllEquipment();
 
@@ -314,12 +350,17 @@ public class SchoolController{
                                    RedirectAttributes redirectAttributes) {
         SchoolService.addNewEquipment(schoolId, equipmentStatus, imagesLink);
         redirectAttributes.addFlashAttribute("message", "Equipment availability added successfully!");
-        return "redirect:/manageEquipment/" + schoolId; // Redirect to the manage equipment page
+        return "redirect:/manageEquipment"; // Redirect to the manage equipment page
     }
 
  
 	@GetMapping("/editEquipment/{schoolId}")
-	public String editEquipment(@PathVariable int schoolId, Model model) {
+	public String editEquipment(@PathVariable int schoolId, Model model,HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+		if ("TEACHER".equalsIgnoreCase(role) == false) {
+		    return "UserManagement/login"; 
+		}
 	    // Fetch studio and equipment details
 	    Map<String, Object> studioAndEquipmentDetails = SchoolService.getStudioAndEquipmentDetails(schoolId);
 	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
@@ -342,8 +383,8 @@ public class SchoolController{
         model.addAttribute("allStudios", allStudios);
         
         // Get the district name based on the districtID of the school
-        int studioLevel = allStudios.get(schoolDetail.getStudioID());
-        model.addAttribute("studioLevel", studioLevel);
+        Integer studioLevel = allStudios.get(schoolDetail.getStudioID());
+        model.addAttribute("studioLevel", studioLevel != null ? studioLevel : 0);
 	    // Add studio level and equipment list to the model
 	    model.addAttribute("studioLevel", studioAndEquipmentDetails.get("studioLevel"));
 	    model.addAttribute("equipmentList", studioAndEquipmentDetails.get("equipmentList"));
@@ -361,11 +402,17 @@ public class SchoolController{
 	                                   RedirectAttributes redirectAttributes) {
 	        SchoolService.editEquipment(schoolId, equipmentStatus, imagesLink);
 	        redirectAttributes.addFlashAttribute("message", "Equipment availability added successfully!");
-	        return "redirect:/manageEquipment/" + schoolId; // Redirect to the manage equipment page
+	        return "redirect:/manageEquipment"; // Redirect to the manage equipment page
 	    }
 
 	@GetMapping("/manageEquipment")
 	public String manageEquipment(HttpSession session, Model model) {
+		String role = (String) session.getAttribute("role");
+	    
+		if (!"TEACHER".equalsIgnoreCase(role) && !"DISTRICT OFFICER".equalsIgnoreCase(role) && !"STATE OFFICER".equalsIgnoreCase(role)) {
+		    return "UserManagement/login"; 
+		}
+
 		int schoolId = (int) session.getAttribute("schoolID");
 		System.out.println("haha "+schoolId);
 	    // Fetch studio and equipment details
@@ -407,6 +454,11 @@ public class SchoolController{
 	
 	@GetMapping("/districtSchoolsStudio")
 	public String viewDistrictSchools( Model model,HttpSession session) {
+		String role = (String) session.getAttribute("role");
+		if (!"DISTRICT OFFICER".equalsIgnoreCase(role) && !"STATE OFFICER".equalsIgnoreCase(role)) {
+		    return "UserManagement/login"; 
+		}
+
 		int districtId = (int) session.getAttribute("districtID");
 		System.out.println("haha "+districtId);
 	    Map<String, Object> result = SchoolService.getSchoolsStudio(districtId);
@@ -421,7 +473,11 @@ public class SchoolController{
 	}
 	
 	@GetMapping("/districtManageStudioDetail/{schoolId}")
-	public String viewDistrictManageStudioDetails(@PathVariable int schoolId, Model model) {
+	public String viewDistrictManageStudioDetails(@PathVariable int schoolId, Model model,HttpSession session) {
+		String role = (String) session.getAttribute("role");
+		if (!"DISTRICT OFFICER".equalsIgnoreCase(role) && !"STATE OFFICER".equalsIgnoreCase(role)) {
+		    return "UserManagement/login"; 
+		}
 	    // Fetch studio and equipment details
 	    Map<String, Object> studioAndEquipmentDetails = SchoolService.getStudioAndEquipmentDetails(schoolId);
 	    School schoolDetail = SchoolService.getSchoolDetailsBySchoolID(schoolId);
@@ -488,7 +544,11 @@ public class SchoolController{
 	}
 	
 	@GetMapping("/stateDistrictsStudioInfo")
-    public String viewDistrictsStudioInfo(Model model) {
+    public String viewDistrictsStudioInfo(Model model,HttpSession session) {
+		String role = (String) session.getAttribute("role");
+		if ("STATE OFFICER".equalsIgnoreCase(role) ==false) {
+		    return "UserManagement/login"; 
+		}
         List<Map<String, Object>> districts = SchoolService.getDistrictsWithDetails();
         model.addAttribute("districts", districts);
 

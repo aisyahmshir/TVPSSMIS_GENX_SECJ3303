@@ -108,7 +108,7 @@ width:100% !important;
 			            <td th:text="${district.totalSchools}"></td>
 			            <td>
 			                <a class="btn btn-primary viewMoreBtn" 
-			                   th:href="@{/districtSchoolsView/{id}(id=${district.districtID})}">
+			                   th:href="@{/districtSchoolsView}">
 			                    Select
 			                </a>
 			            </td>
@@ -132,24 +132,6 @@ width:100% !important;
 <script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
 
 <script>
-		const sidebar = document.getElementById('sidebar');
-		const sidebarOverlay = document.getElementById('sidebarOverlay');
-		const toggleSidebar = document.getElementById('toggleSidebar');
-		const contentWrapper = document.getElementById('contentWrapper');
-		
-		// Toggle sidebar visibility and adjust layout
-		toggleSidebar.addEventListener('click', () => {
-		    sidebar.classList.toggle('-translate-x-full'); // Show or hide sidebar
-		    sidebarOverlay.classList.toggle('hidden');    // Show or hide overlay
-		    contentWrapper.classList.toggle('ml-64');     // Adjust content margin
-		});
-		
-		// Close sidebar when clicking on overlay
-		sidebarOverlay.addEventListener('click', () => {
-		    sidebar.classList.add('-translate-x-full');   // Ensure sidebar is hidden
-		    sidebarOverlay.classList.add('hidden');      // Ensure overlay is hidden
-		    contentWrapper.classList.remove('ml-64');    // Reset content margin
-		});
 
         // Initialize DataTable with export buttons
         $(document).ready(function() {

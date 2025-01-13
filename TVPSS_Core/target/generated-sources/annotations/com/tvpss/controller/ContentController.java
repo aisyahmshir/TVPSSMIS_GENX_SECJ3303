@@ -346,7 +346,11 @@ public class ContentController {
 	@GetMapping("/StateContent")
 	public String homeState(Model model, HttpSession session) {
 	    System.out.println("Fetching state content");
-
+	    String role = (String) session.getAttribute("role");
+	    
+	    if("STATE OFFICER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 	    // List to store district data, where each district contains schools
 	    List<Map<String, Object>> districtsData = new ArrayList<>();
 
@@ -388,12 +392,11 @@ public class ContentController {
 
 	    // Add the districts data to the model for rendering
 	    model.addAttribute("districtsData", districtsData);
-	    String role = (String) session.getAttribute("role");
-        String userID = (String) session.getAttribute("userID");
+        //String userID = (String) session.getAttribute("userID");
 
         // Add attributes to the model
         model.addAttribute("role", role);
-        model.addAttribute("userID", userID);
+        //model.addAttribute("userID", userID);
 
 	    return "ContentLibrary/StateContent"; // Path to the HTML template
 	}
@@ -458,7 +461,12 @@ public class ContentController {
 //	}
 
 	@GetMapping("/StateContentViewMore/{id}")
-	public String viewMoreState(@PathVariable("id") int schoolID, Model model) {
+	public String viewMoreState(@PathVariable("id") int schoolID, Model model, HttpSession session) {
+	    String role = (String) session.getAttribute("role");
+	    
+	    if("STATE OFFICER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 		List<ContentModel> contentList = ContentService.getAllContentBySchoolID(schoolID);
 	    
 	    List<Map<String, Object>> contents = new ArrayList<>();
@@ -553,10 +561,15 @@ public class ContentController {
 
 	@GetMapping("/DistrictContent")
 	public String homeDistrict(Model model, HttpSession session) {
-		
+	    String role = (String) session.getAttribute("role");
+	    
+	    if("DISTRICT OFFICER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 		// Fetch dynamic school data from CrewService
 	    int districtID = (Integer) session.getAttribute("districtID");
 	    System.out.println("Fetching district content");
+	    System.out.println(districtID);
 
 	    // Step 1: Get the list of schools by districtID
 	    List<School> schoolList = ContentService.getAllSchoolByDistrict(districtID); // Call your ContentService method here
@@ -585,12 +598,11 @@ public class ContentController {
 
 	    // Step 4: Add the list of schools to the model
 	    model.addAttribute("schools", schools);
-	    String role = (String) session.getAttribute("role");
-        String userID = (String) session.getAttribute("id");
+        //String userID = (String) session.getAttribute("id");
 
         // Add attributes to the model
         model.addAttribute("role", role);
-        model.addAttribute("userID", userID);
+        //model.addAttribute("userID", userID);
 
 	    // Return the view name to render the district content
 	    return "ContentLibrary/DistrictContent";
@@ -637,7 +649,11 @@ public class ContentController {
 
 	@GetMapping("/DistrictContentViewMore/{id}")
 	public String viewMoreDistrict(@PathVariable("id") int schoolID, Model model,HttpSession session) {
-//		
+		String role = (String) session.getAttribute("role");
+	    
+	    if("DISTRICT OFFICER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 	    // Fetch the list of contents for the given schoolID
 	    List<ContentModel> contentList = ContentService.getAllContentBySchoolID(schoolID);
 	    
@@ -657,12 +673,11 @@ public class ContentController {
 	        contentMap.put("schoolID", content.getSchoolID());
 	        contents.add(contentMap);
 	    }
-	    String role = (String) session.getAttribute("role");
-        String userID = (String) session.getAttribute("id");
+        //String userID = (String) session.getAttribute("id");
 
         // Add attributes to the model
         model.addAttribute("role", role);
-        model.addAttribute("userID", userID);
+        //model.addAttribute("userID", userID);
 
 	    // Add the school and its contents to the model
 	    //model.addAttribute("schoolID", schoolID); // School ID for context
@@ -675,9 +690,13 @@ public class ContentController {
 	@GetMapping("/SchoolContent")
 	public String homeSchool(Model model, HttpSession session) {
 	    System.out.println("I'm in");
+	    
 
-	    // Example student details
-	    String role = "teacher"; // This could come from a user service or session
+		String role = (String) session.getAttribute("role");
+	    
+	    if("TEACHER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 
 	    // Add role to the model
 	    model.addAttribute("role", role);

@@ -26,6 +26,13 @@
                 State Dashboard
             </a>
         </li>
+        
+        <li th:if="${#session.getAttribute('role') == 'Admin'}">
+            <a th:href="@{/UserManagement/approveUsers}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+                <i class="fas fa-user-check h-6 w-6 mr-2"></i>
+                Pending Users
+            </a>
+        </li>
 
         <li th:if="${#session.getAttribute('role') == 'District Officer'}">
             <a th:href="@{/districtSchoolsStudio}" class="flex items-center p-2 hover:bg-blue-700 rounded">
@@ -104,7 +111,7 @@
         </li>
 
         <li th:if="${#session.getAttribute('role') == 'Teacher'}">
-            <a th:href="@{/SchoolContent}" class="flex items-center p-2 hover:bg-blue-700 rounded">
+            <a th:href="@{/teacherSchoolView}" class="flex items-center p-2 hover:bg-blue-700 rounded">
  <i class="fas fa-school h-6 w-6 mr-2"></i>
                 School Information
             </a>

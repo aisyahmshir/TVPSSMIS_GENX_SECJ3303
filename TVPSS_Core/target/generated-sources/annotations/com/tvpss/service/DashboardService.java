@@ -136,7 +136,7 @@ public class DashboardService {
     public static int getStudentActiveToday() {
         int studentTodayCount = 0;
 
-        String query = "SELECT COUNT(*) AS studentTodayCount FROM user WHERE DATE(lastActive) = CURDATE() AND role = 'student'";
+        String query = "SELECT COUNT(*) AS studentTodayCount FROM user WHERE DATE(lastActive) = CURDATE() AND role = 'Student'";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -154,11 +154,12 @@ public class DashboardService {
 
         return studentTodayCount;
     }
+
     
     public static int getTeacherActiveToday() {
         int teacherTodayCount = 0;
 
-        String query = "SELECT COUNT(*) AS teacherTodayCount FROM user WHERE DATE(lastActive) = CURDATE() AND role = 'teacher'";
+        String query = "SELECT COUNT(*) AS teacherTodayCount FROM user WHERE DATE(lastActive) = CURDATE() AND role = 'Teacher'";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -176,11 +177,12 @@ public class DashboardService {
 
         return teacherTodayCount;
     }
+
     
     public static int getDistrictActiveToday() {
         int districtTodayCount = 0;
 
-        String query = "SELECT COUNT(*) AS districtTodayCount FROM user WHERE DATE(lastActive) = CURDATE() AND role = 'district'";
+        String query = "SELECT COUNT(*) AS districtTodayCount FROM user WHERE DATE(lastActive) = CURDATE() AND role = 'District Officer'";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {

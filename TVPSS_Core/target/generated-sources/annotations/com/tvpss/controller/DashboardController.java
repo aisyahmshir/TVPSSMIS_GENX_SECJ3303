@@ -19,6 +19,11 @@ import com.tvpss.service.DashboardService;
 public class DashboardController {
 	@GetMapping("/AdminDashboard")
     public String showPage(Model model, HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("ADMIN".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 		int totalUser = DashboardService.getUserCount();
 		int totalActiveUser = DashboardService.getActiveUserCount();
 		int totalInactiveUser = DashboardService.getInactiveUserCount();
@@ -36,7 +41,6 @@ public class DashboardController {
 		model.addAttribute("labels", List.of("Student", "Teacher", "District"));
         model.addAttribute("data", List.of(studentTodayCount, teacherTodayCount, districtTodayCount));
         
-        String role = (String) session.getAttribute("role");
         String userID = (String) session.getAttribute("userID");
 
         // Add attributes to the model
@@ -48,6 +52,11 @@ public class DashboardController {
 	
 	@GetMapping("/DistrictDashboard")
 	public String showDistrictDashboard(Model model, HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("DISTRICT OFFICER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 		//String districtID = (String) httpSession.getAttribute("districtID");
 	    int districtID = 1;
 	    // Fixed data for the pie chart
@@ -80,7 +89,7 @@ public class DashboardController {
 	    model.addAttribute("barLabels", List.of("Version 1", "Version 2", "Version 3", "Version 4"));
 	    model.addAttribute("barData", List.of(TVPSSv1, TVPSSv2, TVPSSv3, TVPSSv4));
 	    
-	    String role = (String) session.getAttribute("role");
+	    //String role = (String) session.getAttribute("role");
         String userID = (String) session.getAttribute("userID");
 
         // Add attributes to the model
@@ -92,6 +101,11 @@ public class DashboardController {
 	
 	@GetMapping("/StateDashboard")
 	public String showStateDashboard(Model model, HttpSession session) {
+		String role = (String) session.getAttribute("role");
+	    
+	    if("STATE OFFICER".equalsIgnoreCase(role) == false) {
+	    	return "UserManagement/login"; 
+	    }
 		
 		int stateTotalSchool = DashboardService.getStateTotalSchool();
 		int stateTotalDistrict = DashboardService.getStateTotalDistrict();
@@ -150,7 +164,7 @@ public class DashboardController {
 //	    model.addAttribute("lineLabels", List.of("January", "February", "March", "April", "May", "June"));
 //	    model.addAttribute("lineData", List.of(65, 59, 80, 81, 56, 55));
 	    
-	    String role = (String) session.getAttribute("role");
+	  //  String role = (String) session.getAttribute("role");
         String userID = (String) session.getAttribute("userID");
 
         // Add attributes to the model
